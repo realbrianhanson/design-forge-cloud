@@ -71,12 +71,14 @@ export type Database = {
           content_type: string | null
           created_at: string | null
           excerpt: string | null
+          external_id: string | null
           id: string
           image_url: string | null
           is_breaking: boolean | null
           is_featured: boolean | null
           neighborhood_id: string | null
           published_at: string | null
+          rss_source_id: string | null
           slug: string | null
           source_name: string
           source_url: string | null
@@ -95,12 +97,14 @@ export type Database = {
           content_type?: string | null
           created_at?: string | null
           excerpt?: string | null
+          external_id?: string | null
           id?: string
           image_url?: string | null
           is_breaking?: boolean | null
           is_featured?: boolean | null
           neighborhood_id?: string | null
           published_at?: string | null
+          rss_source_id?: string | null
           slug?: string | null
           source_name: string
           source_url?: string | null
@@ -119,12 +123,14 @@ export type Database = {
           content_type?: string | null
           created_at?: string | null
           excerpt?: string | null
+          external_id?: string | null
           id?: string
           image_url?: string | null
           is_breaking?: boolean | null
           is_featured?: boolean | null
           neighborhood_id?: string | null
           published_at?: string | null
+          rss_source_id?: string | null
           slug?: string | null
           source_name?: string
           source_url?: string | null
@@ -140,6 +146,13 @@ export type Database = {
             columns: ["neighborhood_id"]
             isOneToOne: false
             referencedRelation: "neighborhoods"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "articles_rss_source_id_fkey"
+            columns: ["rss_source_id"]
+            isOneToOne: false
+            referencedRelation: "rss_sources"
             referencedColumns: ["id"]
           },
         ]
@@ -489,6 +502,51 @@ export type Database = {
           verification_token?: string | null
           verified_at?: string | null
           weekly_newsletter?: boolean | null
+        }
+        Relationships: []
+      }
+      rss_sources: {
+        Row: {
+          articles_count: number | null
+          category_default: string | null
+          created_at: string | null
+          feed_url: string
+          fetch_frequency_minutes: number | null
+          id: string
+          is_active: boolean | null
+          last_fetched_at: string | null
+          logo_url: string | null
+          name: string
+          slug: string
+          website_url: string | null
+        }
+        Insert: {
+          articles_count?: number | null
+          category_default?: string | null
+          created_at?: string | null
+          feed_url: string
+          fetch_frequency_minutes?: number | null
+          id?: string
+          is_active?: boolean | null
+          last_fetched_at?: string | null
+          logo_url?: string | null
+          name: string
+          slug: string
+          website_url?: string | null
+        }
+        Update: {
+          articles_count?: number | null
+          category_default?: string | null
+          created_at?: string | null
+          feed_url?: string
+          fetch_frequency_minutes?: number | null
+          id?: string
+          is_active?: boolean | null
+          last_fetched_at?: string | null
+          logo_url?: string | null
+          name?: string
+          slug?: string
+          website_url?: string | null
         }
         Relationships: []
       }
