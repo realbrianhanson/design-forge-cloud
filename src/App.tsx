@@ -38,6 +38,7 @@ import Search from "./pages/Search";
 import CrimeMap from "./pages/CrimeMap";
 import CrimeSection from "./pages/CrimeSection";
 import Weather from "./pages/Weather";
+import HurricaneCentral from "./pages/HurricaneCentral";
 import NotFound from "./pages/NotFound";
 
 const queryClient = new QueryClient();
@@ -76,6 +77,7 @@ const App = () => (
                   <Route path="/news/crime-map" element={<CrimeMap />} />
                   <Route path="/news/crime" element={<CrimeSection />} />
                   <Route path="/weather" element={<Weather />} />
+                  <Route path="/weather/hurricane" element={<HurricaneCentral />} />
                   <Route path="/auth/signin" element={<SignIn />} />
                   <Route path="/auth/signup" element={<SignUp />} />
                   <Route path="/auth/forgot-password" element={<ForgotPassword />} />
