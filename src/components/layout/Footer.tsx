@@ -2,6 +2,7 @@ import { Link } from 'react-router-dom';
 import { Twitter, Facebook, Instagram } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
+import logo from '@/assets/logo.png';
 
 const sectionLinks = [
   { label: 'Local News', href: '/category/local' },
@@ -34,9 +35,8 @@ export function Footer() {
         <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-12">
           {/* Brand Column */}
           <div className="lg:col-span-1">
-            <Link to="/" className="inline-flex items-baseline gap-0.5 mb-4">
-              <span className="text-2xl font-bold text-accent">904</span>
-              <span className="text-2xl font-bold text-primary-foreground">NEWS</span>
+            <Link to="/" className="inline-block mb-4">
+              <img src={logo} alt="904 News" className="h-10 w-auto brightness-0 invert" />
             </Link>
             <p className="text-sm text-primary-foreground/70 leading-relaxed mb-6">
               Jacksonville's trusted source for local news, events, and community connection. 

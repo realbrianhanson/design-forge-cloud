@@ -6,6 +6,7 @@ import { useAuth } from '@/hooks/useAuth';
 import { useSearchModal } from '@/hooks/useSearchModal';
 import { Avatar, AvatarFallback, AvatarImage } from '@/components/ui/avatar';
 import { cn } from '@/lib/utils';
+import logo from '@/assets/logo.png';
 
 interface MobileDrawerProps {
   isOpen: boolean;
@@ -91,9 +92,8 @@ export function MobileDrawer({ isOpen, onClose }: MobileDrawerProps) {
       >
         {/* Header */}
         <div className="flex items-center justify-between p-4 border-b border-border">
-          <Link to="/" className="flex items-baseline gap-0.5" onClick={onClose}>
-            <span className="text-xl font-bold text-accent">904</span>
-            <span className="text-xl font-bold text-primary">NEWS</span>
+          <Link to="/" className="flex items-center" onClick={onClose}>
+            <img src={logo} alt="904 News" className="h-8 w-auto" />
           </Link>
           <button
             onClick={onClose}

@@ -1,5 +1,6 @@
 import { Loader2 } from 'lucide-react';
 import { cn } from '@/lib/utils';
+import logo from '@/assets/logo.png';
 
 interface LoadingSpinnerProps {
   size?: 'sm' | 'md' | 'lg';
@@ -33,9 +34,8 @@ export function FullPageLoading({ message }: FullPageLoadingProps) {
     <div className="min-h-screen flex flex-col items-center justify-center bg-background">
       <div className="text-center animate-fade-in">
         {/* Logo with pulse */}
-        <div className="flex items-baseline justify-center gap-0.5 mb-6 animate-pulse">
-          <span className="text-4xl font-bold text-accent">904</span>
-          <span className="text-4xl font-bold text-primary">NEWS</span>
+        <div className="mb-6 animate-pulse">
+          <img src={logo} alt="904 News" className="h-12 w-auto mx-auto" />
         </div>
         
         {/* Spinner */}
