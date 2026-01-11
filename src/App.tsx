@@ -36,6 +36,7 @@ import NewsletterVerify from "./pages/newsletter/NewsletterVerify";
 import NewsletterUnsubscribe from "./pages/newsletter/NewsletterUnsubscribe";
 import Search from "./pages/Search";
 import CrimeMap from "./pages/CrimeMap";
+import CrimeSection from "./pages/CrimeSection";
 import NotFound from "./pages/NotFound";
 
 const queryClient = new QueryClient();
@@ -72,6 +73,7 @@ const App = () => (
                   <Route path="/search" element={<Search />} />
                   <Route path="/crime" element={<CrimeMap />} />
                   <Route path="/news/crime-map" element={<CrimeMap />} />
+                  <Route path="/news/crime" element={<CrimeSection />} />
                   <Route path="/auth/signin" element={<SignIn />} />
                   <Route path="/auth/signup" element={<SignUp />} />
                   <Route path="/auth/forgot-password" element={<ForgotPassword />} />
