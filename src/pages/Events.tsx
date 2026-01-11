@@ -211,7 +211,7 @@ const Events = () => {
                   Calendar
                 </ToggleGroupItem>
                 <ToggleGroupItem value="map" aria-label="Map view" className="px-3 py-1.5 data-[state=on]:bg-background">
-                  <Map className="w-4 h-4 mr-1.5" />
+                  <MapIcon className="w-4 h-4 mr-1.5" />
                   Map
                 </ToggleGroupItem>
               </ToggleGroup>
