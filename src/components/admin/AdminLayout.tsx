@@ -12,7 +12,8 @@ import {
   Settings,
   LogOut,
   Shield,
-  Sparkles
+  Sparkles,
+  Database
 } from 'lucide-react';
 import { Avatar, AvatarFallback, AvatarImage } from '@/components/ui/avatar';
 import { Button } from '@/components/ui/button';
@@ -24,6 +25,7 @@ interface AdminLayoutProps {
 
 const navItems = [
   { path: '/admin', label: 'Dashboard', icon: LayoutDashboard },
+  { path: '/admin/data', label: 'Data Management', icon: Database },
   { path: '/admin/articles', label: 'Articles', icon: Newspaper },
   { path: '/admin/events', label: 'Events', icon: Calendar },
   { path: '/admin/businesses', label: 'Businesses', icon: Building2 },
