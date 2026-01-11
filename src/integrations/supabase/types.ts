@@ -14,6 +14,53 @@ export type Database = {
   }
   public: {
     Tables: {
+      ai_processing_logs: {
+        Row: {
+          article_id: string | null
+          category_result: string | null
+          created_at: string
+          error_message: string | null
+          id: string
+          is_breaking_result: boolean | null
+          neighborhood_result: string | null
+          success: boolean | null
+          summary_result: string | null
+          tokens_used: number | null
+        }
+        Insert: {
+          article_id?: string | null
+          category_result?: string | null
+          created_at?: string
+          error_message?: string | null
+          id?: string
+          is_breaking_result?: boolean | null
+          neighborhood_result?: string | null
+          success?: boolean | null
+          summary_result?: string | null
+          tokens_used?: number | null
+        }
+        Update: {
+          article_id?: string | null
+          category_result?: string | null
+          created_at?: string
+          error_message?: string | null
+          id?: string
+          is_breaking_result?: boolean | null
+          neighborhood_result?: string | null
+          success?: boolean | null
+          summary_result?: string | null
+          tokens_used?: number | null
+        }
+        Relationships: [
+          {
+            foreignKeyName: "ai_processing_logs_article_id_fkey"
+            columns: ["article_id"]
+            isOneToOne: false
+            referencedRelation: "articles"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       articles: {
         Row: {
           ai_summary: string | null
