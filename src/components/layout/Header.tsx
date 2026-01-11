@@ -3,6 +3,7 @@ import { Link, useLocation } from 'react-router-dom';
 import { Search, Menu, X, User, LogOut } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { useAuth } from '@/hooks/useAuth';
+import { useSearchModal } from '@/hooks/useSearchModal';
 import {
   DropdownMenu,
   DropdownMenuContent,
@@ -36,6 +37,7 @@ export function Header() {
   const [isMobileMenuOpen, setIsMobileMenuOpen] = useState(false);
   const location = useLocation();
   const { user, profile, signOut } = useAuth();
+  const { openSearch } = useSearchModal();
 
   useEffect(() => {
     const handleScroll = () => {
@@ -100,10 +102,14 @@ export function Header() {
             {/* Right Side Actions */}
             <div className="flex items-center gap-2 md:gap-4">
               <button
-                className="p-2 text-muted-foreground hover:text-accent transition-colors duration-200"
-                aria-label="Search"
+                onClick={openSearch}
+                className="p-2 text-muted-foreground hover:text-accent transition-colors duration-200 flex items-center gap-2"
+                aria-label="Search (⌘K)"
               >
                 <Search className="w-5 h-5" />
+                <span className="hidden lg:flex items-center gap-1 text-xs text-muted-foreground border border-border rounded px-1.5 py-0.5">
+                  ⌘K
+                </span>
               </button>
 
               {user ? (
