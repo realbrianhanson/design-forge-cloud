@@ -1,7 +1,8 @@
 import { Link } from 'react-router-dom';
-import { MessageCircle, ExternalLink } from 'lucide-react';
+import { MessageCircle } from 'lucide-react';
 import { Tables } from '@/integrations/supabase/types';
 import { Skeleton } from '@/components/ui/skeleton';
+import { SourceLink } from '@/components/article/SourceBadge';
 import { getCategoryStyles, formatTimeAgo, formatCategoryDisplay } from '@/lib/articleUtils';
 import { cn } from '@/lib/utils';
 
@@ -97,10 +98,10 @@ const FeaturedCard = ({
           )}
           
           <div className="flex items-center gap-4 text-sm text-muted-foreground mt-6">
-            <span className="flex items-center gap-1">
-              {article.source_name}
-              {article.source_url && <ExternalLink className="w-3 h-3" />}
-            </span>
+            <SourceLink 
+              sourceName={article.source_name}
+              sourceUrl={article.source_url}
+            />
             <span>•</span>
             <span>{timeAgo}</span>
             {article.comment_count !== null && article.comment_count > 0 && (
@@ -178,7 +179,10 @@ const StandardCard = ({
         )}
         
         <div className="flex items-center justify-between mt-4 pt-4 border-t border-border text-xs text-muted-foreground">
-          <span>{article.source_name}</span>
+          <SourceLink 
+            sourceName={article.source_name}
+            sourceUrl={article.source_url}
+          />
           <span>{timeAgo}</span>
         </div>
       </div>
@@ -247,7 +251,11 @@ const HorizontalCard = ({
         )}
         
         <div className="flex items-center gap-3 sm:gap-4 mt-3 text-xs sm:text-sm text-muted-foreground">
-          <span className="truncate">{article.source_name}</span>
+          <SourceLink 
+            sourceName={article.source_name}
+            sourceUrl={article.source_url}
+            className="truncate"
+          />
           <span>•</span>
           <span>{timeAgo}</span>
           {article.comment_count !== null && article.comment_count > 0 && (

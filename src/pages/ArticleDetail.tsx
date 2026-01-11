@@ -1,6 +1,6 @@
 import { useEffect, useRef } from 'react';
 import { useParams, Link } from 'react-router-dom';
-import { ExternalLink, ArrowRight } from 'lucide-react';
+import { ExternalLink, ArrowRight, Info } from 'lucide-react';
 import { Layout } from '@/components/layout/Layout';
 import { SEO, generateArticleSchema } from '@/components/SEO';
 import { Breadcrumb } from '@/components/ui/breadcrumb-nav';
@@ -8,8 +8,10 @@ import { ArticleCard, ArticleCardSkeleton } from '@/components/home/ArticleCard'
 import { EngagementBar } from '@/components/article/EngagementBar';
 import { AiSummaryCard } from '@/components/article/AiSummaryCard';
 import { CommentsSection } from '@/components/article/CommentsSection';
+import { SourceBadge } from '@/components/article/SourceBadge';
 import { Button } from '@/components/ui/button';
 import { Skeleton } from '@/components/ui/skeleton';
+import { Alert, AlertDescription } from '@/components/ui/alert';
 import { useArticle, useRelatedArticles } from '@/hooks/useArticles';
 import { useArticleComments } from '@/hooks/useComments';
 import { getCategoryStyles, formatCategoryDisplay } from '@/lib/articleUtils';
@@ -127,24 +129,21 @@ const ArticleDetail = () => {
 
             <div className="flex items-center flex-wrap gap-x-4 gap-y-2 mt-6 text-muted-foreground">
               {article.source_name && (
-                <span className="flex items-center gap-1">
-                  via{' '}
-                  {article.source_url ? (
-                    <a 
-                      href={article.source_url} 
-                      target="_blank" 
-                      rel="noopener noreferrer"
-                      className="text-accent hover:text-accent/80 inline-flex items-center gap-1"
-                    >
-                      {article.source_name}
-                      <ExternalLink className="w-3 h-3" />
-                    </a>
-                  ) : (
-                    article.source_name
-                  )}
-                </span>
+                <div className="flex items-center gap-2">
+                  <span className="text-sm">Originally published by</span>
+                  <SourceBadge
+                    source={{
+                      name: article.source_name,
+                      website_url: article.source_url,
+                    }}
+                    size="md"
+                    showLink={!!article.source_url}
+                  />
+                </div>
               )}
+              <span className="hidden sm:inline">•</span>
               <span>{formatFullDate(article.published_at || article.created_at || new Date())}</span>
+              <span className="hidden sm:inline">•</span>
               <span>{estimateReadingTime(article.content || article.excerpt || '')}</span>
             </div>
 
@@ -189,23 +188,34 @@ const ArticleDetail = () => {
 
           {/* Read Full Article CTA (for aggregated content) */}
           {isAggregated && article.source_url && (
-            <div className="mt-8">
-              <a 
-                href={article.source_url} 
-                target="_blank" 
-                rel="noopener noreferrer"
-              >
-                <Button 
-                  size="lg" 
-                  className="bg-accent hover:bg-accent/90 text-accent-foreground px-8 py-6 text-lg font-semibold"
-                >
-                  Read Full Article at {article.source_name}
-                  <ArrowRight className="w-5 h-5 ml-2" />
-                </Button>
-              </a>
-              <p className="text-sm text-muted-foreground mt-3">
-                904News provides summaries and links to original reporting. We encourage you to support local journalism.
-              </p>
+            <div className="mt-8 p-6 bg-muted/50 rounded-xl border border-border">
+              <div className="flex items-start gap-4">
+                <div className="flex-1">
+                  <p className="text-sm text-muted-foreground mb-3">
+                    This article was originally published by <strong className="text-foreground">{article.source_name}</strong>
+                  </p>
+                  <a 
+                    href={article.source_url} 
+                    target="_blank" 
+                    rel="noopener noreferrer"
+                  >
+                    <Button 
+                      size="lg" 
+                      className="bg-accent hover:bg-accent/90 text-accent-foreground"
+                    >
+                      Read Full Article
+                      <ExternalLink className="w-4 h-4 ml-2" />
+                    </Button>
+                  </a>
+                </div>
+              </div>
+
+              <Alert className="mt-4 bg-background border-border">
+                <Info className="h-4 w-4" />
+                <AlertDescription className="text-xs text-muted-foreground">
+                  904News aggregates local news with AI-generated summaries. Support local journalism by visiting the original source.
+                </AlertDescription>
+              </Alert>
             </div>
           )}
 
