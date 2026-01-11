@@ -16,18 +16,61 @@ interface NewsAPIArticle {
   content: string | null;
 }
 
-// Jacksonville-specific keywords to prioritize local news
+interface RSSItem {
+  title: string;
+  link: string;
+  description: string;
+  pubDate: string;
+  imageUrl?: string;
+}
+
+// Jacksonville-specific keywords for strict filtering
 const JACKSONVILLE_KEYWORDS = [
   'jacksonville', 'jax', 'duval', 'st. johns', 'clay county', 'nassau county',
-  'beaches', 'ponte vedra', 'orange park', 'fleming island', 'mandarin',
+  'ponte vedra', 'orange park', 'fleming island', 'mandarin',
   'riverside', 'san marco', 'avondale', 'jaguars', 'jumbo shrimp', 'icemen',
   'jea', 'jta', 'fscj', 'unf', 'mayo clinic jacksonville', 'baptist health',
-  'st. augustine', 'fernandina', 'amelia island'
+  'st. augustine', 'fernandina', 'amelia island', 'neptune beach', 
+  'atlantic beach', 'jacksonville beach', 'arlington', 'westside',
+  'northside', 'southside', 'downtown jacksonville', 'five points',
+  'springfield', 'murray hill', 'ortega', 'san jose', 'baymeadows',
+  'town center', 'regency', 'gateway', 'deerwood', 'tinseltown'
 ];
 
-function isJacksonvilleRelevant(article: NewsAPIArticle): boolean {
-  const text = `${article.title} ${article.description || ''} ${article.source.name}`.toLowerCase();
-  return JACKSONVILLE_KEYWORDS.some(keyword => text.includes(keyword));
+// Local Jacksonville news domains
+const LOCAL_JACKSONVILLE_DOMAINS = [
+  'jacksonville.com', 'news4jax.com', 'firstcoastnews.com', 
+  'actionnewsjax.com', 'jaxdailyrecord.com', 'folioweekly.com',
+  'wjxt.com', 'wjct.org', 'jaxtoday.org'
+];
+
+function isStrictlyJacksonvilleRelevant(article: NewsAPIArticle): boolean {
+  const text = `${article.title} ${article.description || ''}`.toLowerCase();
+  const sourceName = article.source.name.toLowerCase();
+  const url = article.url.toLowerCase();
+  
+  // Check if from local Jacksonville domain
+  const isLocalSource = LOCAL_JACKSONVILLE_DOMAINS.some(domain => 
+    url.includes(domain) || sourceName.includes(domain.split('.')[0])
+  );
+  
+  if (isLocalSource) return true;
+  
+  // Check for Jacksonville-specific keywords with stricter matching
+  const hasJaxKeyword = JACKSONVILLE_KEYWORDS.some(keyword => {
+    // Require the keyword as a distinct word (not part of another word)
+    const regex = new RegExp(`\\b${keyword}\\b`, 'i');
+    return regex.test(text);
+  });
+  
+  // For non-local sources, require explicit Jacksonville mention
+  if (hasJaxKeyword) {
+    // Must specifically mention Jacksonville, Jax, or Duval
+    const hasPrimaryKeyword = /\b(jacksonville|jax|duval)\b/i.test(text);
+    return hasPrimaryKeyword;
+  }
+  
+  return false;
 }
 
 function createSlug(title: string): string {
@@ -45,26 +88,28 @@ function categorizeArticle(title: string, description?: string): string {
   
   if (text.includes('crime') || text.includes('arrest') || text.includes('police') || 
       text.includes('murder') || text.includes('shooting') || text.includes('robbery') ||
-      text.includes('suspect') || text.includes('investigation')) {
+      text.includes('suspect') || text.includes('investigation') || text.includes('jso')) {
     return 'Crime';
   }
   if (text.includes('business') || text.includes('economy') || text.includes('market') || 
       text.includes('company') || text.includes('stock') || text.includes('jobs') ||
-      text.includes('hiring') || text.includes('development')) {
+      text.includes('hiring') || text.includes('development') || text.includes('opening')) {
     return 'Business';
   }
-  if (text.includes('sport') || text.includes('jaguars') || text.includes('football') || 
-      text.includes('basketball') || text.includes('game') || text.includes('nfl') ||
-      text.includes('gators') || text.includes('seminoles') || text.includes('playoff')) {
+  if (text.includes('jaguars') || text.includes('jumbo shrimp') || text.includes('icemen') ||
+      text.includes('football') || text.includes('basketball') || text.includes('nfl') ||
+      text.includes('gators') || text.includes('seminoles') || text.includes('playoff') ||
+      text.includes('sport') || text.includes('game') || text.includes('coach')) {
     return 'Sports';
   }
   if (text.includes('school') || text.includes('education') || text.includes('student') || 
-      text.includes('university') || text.includes('college') || text.includes('dcps')) {
+      text.includes('university') || text.includes('college') || text.includes('dcps') ||
+      text.includes('teacher') || text.includes('unf') || text.includes('fscj')) {
     return 'Education';
   }
   if (text.includes('traffic') || text.includes('road') || text.includes('highway') || 
       text.includes('crash') || text.includes('accident') || text.includes('i-95') ||
-      text.includes('construction')) {
+      text.includes('construction') || text.includes('jta') || text.includes('skyway')) {
     return 'Traffic';
   }
   if (text.includes('weather') || text.includes('storm') || text.includes('hurricane') || 
@@ -80,11 +125,59 @@ function categorizeArticle(title: string, description?: string): string {
     return 'Entertainment';
   }
   if (text.includes('politic') || text.includes('election') || text.includes('vote') ||
-      text.includes('mayor') || text.includes('council') || text.includes('governor')) {
+      text.includes('mayor') || text.includes('council') || text.includes('governor') ||
+      text.includes('city hall') || text.includes('county commission')) {
     return 'Politics';
   }
   
   return 'Local';
+}
+
+// Parse RSS feed
+async function fetchRSSFeed(url: string, sourceName: string): Promise<RSSItem[]> {
+  try {
+    console.log(`Fetching RSS from: ${url}`);
+    const response = await fetch(url, {
+      headers: {
+        'User-Agent': 'Mozilla/5.0 (compatible; JaxLocalNews/1.0)',
+      },
+    });
+    
+    if (!response.ok) {
+      console.log(`RSS fetch failed for ${sourceName}: ${response.status}`);
+      return [];
+    }
+    
+    const xml = await response.text();
+    const items: RSSItem[] = [];
+    
+    // Simple XML parsing for RSS items
+    const itemMatches = xml.match(/<item>[\s\S]*?<\/item>/gi) || [];
+    
+    for (const itemXml of itemMatches.slice(0, 15)) {
+      const title = itemXml.match(/<title><!\[CDATA\[(.*?)\]\]><\/title>|<title>(.*?)<\/title>/i);
+      const link = itemXml.match(/<link><!\[CDATA\[(.*?)\]\]><\/link>|<link>(.*?)<\/link>/i);
+      const description = itemXml.match(/<description><!\[CDATA\[(.*?)\]\]><\/description>|<description>(.*?)<\/description>/is);
+      const pubDate = itemXml.match(/<pubDate>(.*?)<\/pubDate>/i);
+      const imageMatch = itemXml.match(/<media:content[^>]*url="([^"]+)"|<enclosure[^>]*url="([^"]+)"/i);
+      
+      if (title && link) {
+        items.push({
+          title: (title[1] || title[2] || '').trim(),
+          link: (link[1] || link[2] || '').trim(),
+          description: (description?.[1] || description?.[2] || '').replace(/<[^>]+>/g, '').trim().substring(0, 500),
+          pubDate: pubDate?.[1] || new Date().toISOString(),
+          imageUrl: imageMatch?.[1] || imageMatch?.[2],
+        });
+      }
+    }
+    
+    console.log(`Parsed ${items.length} items from ${sourceName}`);
+    return items;
+  } catch (error) {
+    console.log(`Error fetching ${sourceName} RSS: ${error}`);
+    return [];
+  }
 }
 
 Deno.serve(async (req) => {
@@ -102,28 +195,47 @@ Deno.serve(async (req) => {
     const supabaseServiceKey = Deno.env.get('SUPABASE_SERVICE_ROLE_KEY')!;
     const supabase = createClient(supabaseUrl, supabaseServiceKey);
 
-    // More specific Jacksonville/Northeast Florida search queries
-    const searchQueries = [
-      'Jacksonville Florida news',
-      'Jacksonville Jaguars',
-      'Duval County Florida',
-      'St. Johns County Florida',
-      'Northeast Florida',
-      'St. Augustine Florida',
-      'Jacksonville crime',
-      'Jacksonville business',
-      'Florida Gators',
+    // Local Jacksonville RSS feeds
+    const rssSources = [
+      { url: 'https://www.jacksonville.com/arc/outboundfeeds/rss/?outputType=xml', name: 'Florida Times-Union' },
+      { url: 'https://www.news4jax.com/rss/', name: 'News4Jax' },
+      { url: 'https://www.firstcoastnews.com/feeds/syndication/rss/news/local', name: 'First Coast News' },
     ];
 
     let allArticles: NewsAPIArticle[] = [];
 
-    // Search for Jacksonville-specific news first
-    for (const query of searchQueries) {
-      if (allArticles.length >= 100) break;
+    // Fetch from local RSS feeds first
+    for (const source of rssSources) {
+      const rssItems = await fetchRSSFeed(source.url, source.name);
+      const converted = rssItems.map(item => ({
+        source: { id: null, name: source.name },
+        author: null,
+        title: item.title,
+        description: item.description,
+        url: item.link,
+        urlToImage: item.imageUrl || null,
+        publishedAt: new Date(item.pubDate).toISOString(),
+        content: item.description,
+      }));
+      allArticles = [...allArticles, ...converted];
+    }
 
-      console.log(`Searching for: ${query}`);
+    console.log(`Fetched ${allArticles.length} articles from RSS feeds`);
+
+    // Supplement with NewsAPI using strict Jacksonville-only search
+    const newsApiQueries = [
+      '"Jacksonville Florida"',
+      '"Duval County"',
+      '"Jacksonville Jaguars"',
+      '"St. Augustine" Florida',
+    ];
+
+    for (const query of newsApiQueries) {
+      if (allArticles.length >= 80) break;
+
+      console.log(`NewsAPI search: ${query}`);
       const response = await fetch(
-        `https://newsapi.org/v2/everything?q=${encodeURIComponent(query)}&language=en&sortBy=publishedAt&pageSize=20`,
+        `https://newsapi.org/v2/everything?q=${encodeURIComponent(query)}&language=en&sortBy=publishedAt&pageSize=15`,
         {
           headers: {
             'X-Api-Key': NEWS_API_KEY,
@@ -135,15 +247,18 @@ Deno.serve(async (req) => {
         const data = await response.json();
         console.log(`Got ${data.articles?.length || 0} articles for "${query}"`);
         if (data.articles) {
-          allArticles = [...allArticles, ...data.articles];
+          // Apply strict filtering to NewsAPI results
+          const relevantArticles = data.articles.filter(isStrictlyJacksonvilleRelevant);
+          console.log(`${relevantArticles.length} passed strict Jacksonville filter`);
+          allArticles = [...allArticles, ...relevantArticles];
         }
       } else {
         const errorText = await response.text();
-        console.log(`Search request failed: ${response.status} - ${errorText}`);
+        console.log(`NewsAPI request failed: ${response.status} - ${errorText}`);
       }
     }
 
-    console.log(`Total articles fetched: ${allArticles.length}`);
+    console.log(`Total articles collected: ${allArticles.length}`);
 
     // Filter out articles without titles or with "[Removed]" content
     const validArticles = allArticles.filter(
@@ -162,22 +277,13 @@ Deno.serve(async (req) => {
       return acc;
     }, [] as NewsAPIArticle[]);
 
-    // Prioritize Jacksonville-relevant articles
-    const jacksonvilleArticles = uniqueArticles.filter(isJacksonvilleRelevant);
-    const otherArticles = uniqueArticles.filter(a => !isJacksonvilleRelevant(a));
-    
-    // Combine with Jacksonville articles first
-    const sortedArticles = [...jacksonvilleArticles, ...otherArticles];
+    console.log(`Unique valid articles: ${uniqueArticles.length}`);
 
-    console.log(`Jacksonville-relevant articles: ${jacksonvilleArticles.length}`);
-    console.log(`Valid unique articles: ${uniqueArticles.length}`);
-
-    // Check which articles already exist - use smaller batches to avoid issues
+    // Check which articles already exist
     const existingUrls = new Set<string>();
     
-    // Check in batches of 50 to avoid query limits
-    for (let i = 0; i < sortedArticles.length; i += 50) {
-      const batch = sortedArticles.slice(i, i + 50);
+    for (let i = 0; i < uniqueArticles.length; i += 50) {
+      const batch = uniqueArticles.slice(i, i + 50);
       const urls = batch.map(a => a.url);
       const { data: existingArticles } = await supabase
         .from('articles')
@@ -189,29 +295,30 @@ Deno.serve(async (req) => {
       });
     }
 
-    const newArticles = sortedArticles.filter(a => !existingUrls.has(a.url));
+    const newArticles = uniqueArticles.filter(a => !existingUrls.has(a.url));
 
     console.log(`New articles to import: ${newArticles.length}`);
 
-    // Take only first 20 new articles
-    const articlesToInsert = newArticles.slice(0, 20);
+    // Take first 25 new articles
+    const articlesToInsert = newArticles.slice(0, 25);
 
     if (articlesToInsert.length === 0) {
       return new Response(
         JSON.stringify({ 
           success: true, 
-          message: 'No new articles to import',
+          message: 'No new Jacksonville articles to import',
           imported: 0 
         }),
         { headers: { ...corsHeaders, 'Content-Type': 'application/json' } }
       );
     }
 
-    // Insert articles one by one to handle duplicates gracefully
-    const insertedArticles: Array<{ title: string; category: string }> = [];
+    // Insert articles one by one
+    const insertedArticles: Array<{ title: string; category: string; source: string }> = [];
     
     for (const article of articlesToInsert) {
       try {
+        const category = categorizeArticle(article.title, article.description || '');
         const { data: inserted, error: insertError } = await supabase
           .from('articles')
           .insert({
@@ -220,9 +327,9 @@ Deno.serve(async (req) => {
             excerpt: article.description || article.title,
             content: article.content || article.description || article.title,
             source_url: article.url,
-            source_name: article.source.name || 'NewsAPI',
+            source_name: article.source.name || 'Local News',
             image_url: article.urlToImage,
-            category: categorizeArticle(article.title, article.description || ''),
+            category: category,
             published_at: article.publishedAt,
             status: 'active',
             content_type: 'aggregated',
@@ -236,22 +343,24 @@ Deno.serve(async (req) => {
           .single();
 
         if (!insertError && inserted) {
-          insertedArticles.push(inserted);
+          insertedArticles.push({
+            title: inserted.title,
+            category: inserted.category,
+            source: article.source.name,
+          });
         }
       } catch (e) {
-        // Skip duplicates silently
-        console.log(`Skipped duplicate: ${article.title}`);
+        console.log(`Skipped: ${article.title}`);
       }
     }
 
-    console.log(`Successfully imported ${insertedArticles.length} articles`);
+    console.log(`Successfully imported ${insertedArticles.length} Jacksonville articles`);
 
     return new Response(
       JSON.stringify({
         success: true,
-        message: `Successfully imported ${insertedArticles.length} articles from NewsAPI`,
+        message: `Successfully imported ${insertedArticles.length} Jacksonville local news articles`,
         imported: insertedArticles.length,
-        jacksonvilleRelevant: jacksonvilleArticles.length,
         articles: insertedArticles,
       }),
       { headers: { ...corsHeaders, 'Content-Type': 'application/json' } }
