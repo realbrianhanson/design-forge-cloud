@@ -14,7 +14,122 @@ export type Database = {
   }
   public: {
     Tables: {
-      [_ in never]: never
+      articles: {
+        Row: {
+          ai_summary: string | null
+          author_id: string | null
+          category: string
+          comment_count: number | null
+          content: string | null
+          content_type: string | null
+          created_at: string | null
+          excerpt: string | null
+          id: string
+          image_url: string | null
+          is_breaking: boolean | null
+          is_featured: boolean | null
+          neighborhood_id: string | null
+          published_at: string | null
+          slug: string | null
+          source_name: string
+          source_url: string | null
+          status: string | null
+          title: string
+          updated_at: string | null
+          upvotes: number | null
+          view_count: number | null
+        }
+        Insert: {
+          ai_summary?: string | null
+          author_id?: string | null
+          category: string
+          comment_count?: number | null
+          content?: string | null
+          content_type?: string | null
+          created_at?: string | null
+          excerpt?: string | null
+          id?: string
+          image_url?: string | null
+          is_breaking?: boolean | null
+          is_featured?: boolean | null
+          neighborhood_id?: string | null
+          published_at?: string | null
+          slug?: string | null
+          source_name: string
+          source_url?: string | null
+          status?: string | null
+          title: string
+          updated_at?: string | null
+          upvotes?: number | null
+          view_count?: number | null
+        }
+        Update: {
+          ai_summary?: string | null
+          author_id?: string | null
+          category?: string
+          comment_count?: number | null
+          content?: string | null
+          content_type?: string | null
+          created_at?: string | null
+          excerpt?: string | null
+          id?: string
+          image_url?: string | null
+          is_breaking?: boolean | null
+          is_featured?: boolean | null
+          neighborhood_id?: string | null
+          published_at?: string | null
+          slug?: string | null
+          source_name?: string
+          source_url?: string | null
+          status?: string | null
+          title?: string
+          updated_at?: string | null
+          upvotes?: number | null
+          view_count?: number | null
+        }
+        Relationships: [
+          {
+            foreignKeyName: "articles_neighborhood_id_fkey"
+            columns: ["neighborhood_id"]
+            isOneToOne: false
+            referencedRelation: "neighborhoods"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      neighborhoods: {
+        Row: {
+          created_at: string | null
+          description: string | null
+          display_order: number | null
+          id: string
+          image_url: string | null
+          name: string
+          slug: string
+          zip_codes: string[] | null
+        }
+        Insert: {
+          created_at?: string | null
+          description?: string | null
+          display_order?: number | null
+          id?: string
+          image_url?: string | null
+          name: string
+          slug: string
+          zip_codes?: string[] | null
+        }
+        Update: {
+          created_at?: string | null
+          description?: string | null
+          display_order?: number | null
+          id?: string
+          image_url?: string | null
+          name?: string
+          slug?: string
+          zip_codes?: string[] | null
+        }
+        Relationships: []
+      }
     }
     Views: {
       [_ in never]: never
