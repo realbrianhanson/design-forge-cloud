@@ -20,3 +20,9 @@ verify_jwt = false
 
 [functions.fetch-weather]
 verify_jwt = false
+
+[functions.import-businesses]
+verify_jwt = false
+
+[functions.import-rss-articles]
+verify_jwt = false
