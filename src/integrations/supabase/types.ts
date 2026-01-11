@@ -97,6 +97,229 @@ export type Database = {
           },
         ]
       }
+      business_categories: {
+        Row: {
+          display_order: number | null
+          icon: string | null
+          id: string
+          name: string
+          slug: string
+        }
+        Insert: {
+          display_order?: number | null
+          icon?: string | null
+          id?: string
+          name: string
+          slug: string
+        }
+        Update: {
+          display_order?: number | null
+          icon?: string | null
+          id?: string
+          name?: string
+          slug?: string
+        }
+        Relationships: []
+      }
+      businesses: {
+        Row: {
+          address: string | null
+          category: string
+          city: string | null
+          claimed: boolean | null
+          claimed_by: string | null
+          cover_image_url: string | null
+          created_at: string | null
+          description: string | null
+          email: string | null
+          gallery_urls: string[] | null
+          hours: Json | null
+          id: string
+          is_featured: boolean | null
+          logo_url: string | null
+          name: string
+          neighborhood_id: string | null
+          phone: string | null
+          price_level: number | null
+          rating: number | null
+          review_count: number | null
+          short_description: string | null
+          slug: string
+          state: string | null
+          status: string | null
+          subcategories: string[] | null
+          updated_at: string | null
+          verified: boolean | null
+          view_count: number | null
+          website: string | null
+          zip_code: string | null
+        }
+        Insert: {
+          address?: string | null
+          category: string
+          city?: string | null
+          claimed?: boolean | null
+          claimed_by?: string | null
+          cover_image_url?: string | null
+          created_at?: string | null
+          description?: string | null
+          email?: string | null
+          gallery_urls?: string[] | null
+          hours?: Json | null
+          id?: string
+          is_featured?: boolean | null
+          logo_url?: string | null
+          name: string
+          neighborhood_id?: string | null
+          phone?: string | null
+          price_level?: number | null
+          rating?: number | null
+          review_count?: number | null
+          short_description?: string | null
+          slug: string
+          state?: string | null
+          status?: string | null
+          subcategories?: string[] | null
+          updated_at?: string | null
+          verified?: boolean | null
+          view_count?: number | null
+          website?: string | null
+          zip_code?: string | null
+        }
+        Update: {
+          address?: string | null
+          category?: string
+          city?: string | null
+          claimed?: boolean | null
+          claimed_by?: string | null
+          cover_image_url?: string | null
+          created_at?: string | null
+          description?: string | null
+          email?: string | null
+          gallery_urls?: string[] | null
+          hours?: Json | null
+          id?: string
+          is_featured?: boolean | null
+          logo_url?: string | null
+          name?: string
+          neighborhood_id?: string | null
+          phone?: string | null
+          price_level?: number | null
+          rating?: number | null
+          review_count?: number | null
+          short_description?: string | null
+          slug?: string
+          state?: string | null
+          status?: string | null
+          subcategories?: string[] | null
+          updated_at?: string | null
+          verified?: boolean | null
+          view_count?: number | null
+          website?: string | null
+          zip_code?: string | null
+        }
+        Relationships: [
+          {
+            foreignKeyName: "businesses_neighborhood_id_fkey"
+            columns: ["neighborhood_id"]
+            isOneToOne: false
+            referencedRelation: "neighborhoods"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      events: {
+        Row: {
+          category: string
+          created_at: string | null
+          description: string | null
+          end_time: string | null
+          id: string
+          image_url: string | null
+          is_featured: boolean | null
+          location_address: string | null
+          location_name: string | null
+          neighborhood_id: string | null
+          organizer_id: string | null
+          organizer_name: string | null
+          price_max: number | null
+          price_min: number | null
+          price_type: string | null
+          save_count: number | null
+          short_description: string | null
+          slug: string | null
+          source_type: string | null
+          start_time: string
+          status: string | null
+          ticket_url: string | null
+          title: string
+          updated_at: string | null
+          view_count: number | null
+        }
+        Insert: {
+          category: string
+          created_at?: string | null
+          description?: string | null
+          end_time?: string | null
+          id?: string
+          image_url?: string | null
+          is_featured?: boolean | null
+          location_address?: string | null
+          location_name?: string | null
+          neighborhood_id?: string | null
+          organizer_id?: string | null
+          organizer_name?: string | null
+          price_max?: number | null
+          price_min?: number | null
+          price_type?: string | null
+          save_count?: number | null
+          short_description?: string | null
+          slug?: string | null
+          source_type?: string | null
+          start_time: string
+          status?: string | null
+          ticket_url?: string | null
+          title: string
+          updated_at?: string | null
+          view_count?: number | null
+        }
+        Update: {
+          category?: string
+          created_at?: string | null
+          description?: string | null
+          end_time?: string | null
+          id?: string
+          image_url?: string | null
+          is_featured?: boolean | null
+          location_address?: string | null
+          location_name?: string | null
+          neighborhood_id?: string | null
+          organizer_id?: string | null
+          organizer_name?: string | null
+          price_max?: number | null
+          price_min?: number | null
+          price_type?: string | null
+          save_count?: number | null
+          short_description?: string | null
+          slug?: string | null
+          source_type?: string | null
+          start_time?: string
+          status?: string | null
+          ticket_url?: string | null
+          title?: string
+          updated_at?: string | null
+          view_count?: number | null
+        }
+        Relationships: [
+          {
+            foreignKeyName: "events_neighborhood_id_fkey"
+            columns: ["neighborhood_id"]
+            isOneToOne: false
+            referencedRelation: "neighborhoods"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       neighborhoods: {
         Row: {
           created_at: string | null
