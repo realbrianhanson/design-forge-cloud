@@ -2,6 +2,7 @@ import { useQuery } from '@tanstack/react-query';
 import { supabase } from '@/integrations/supabase/client';
 import { useAuth } from '@/hooks/useAuth';
 import { AdminLayout } from '@/components/admin/AdminLayout';
+import { NewsPipelineAdmin } from '@/components/admin/NewsPipelineAdmin';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
 import { Avatar, AvatarFallback, AvatarImage } from '@/components/ui/avatar';
@@ -289,6 +290,11 @@ const AdminDashboard = () => {
             )}
           </CardContent>
         </Card>
+      </div>
+
+      {/* News Pipeline */}
+      <div className="mb-8">
+        <NewsPipelineAdmin />
       </div>
 
       {/* Activity Chart Placeholder */}
