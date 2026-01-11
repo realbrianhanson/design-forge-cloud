@@ -1,7 +1,16 @@
 import { useState, useEffect } from 'react';
 import { Link, useLocation } from 'react-router-dom';
-import { Search, Menu, X } from 'lucide-react';
+import { Search, Menu, X, User, LogOut } from 'lucide-react';
 import { Button } from '@/components/ui/button';
+import { useAuth } from '@/hooks/useAuth';
+import {
+  DropdownMenu,
+  DropdownMenuContent,
+  DropdownMenuItem,
+  DropdownMenuSeparator,
+  DropdownMenuTrigger,
+} from '@/components/ui/dropdown-menu';
+import { Avatar, AvatarFallback, AvatarImage } from '@/components/ui/avatar';
 
 const mainNavLinks = [
   { label: 'News', href: '/news' },
@@ -26,6 +35,7 @@ export function Header() {
   const [isScrolled, setIsScrolled] = useState(false);
   const [isMobileMenuOpen, setIsMobileMenuOpen] = useState(false);
   const location = useLocation();
+  const { user, profile, signOut } = useAuth();
 
   useEffect(() => {
     const handleScroll = () => {
@@ -35,6 +45,20 @@ export function Header() {
     window.addEventListener('scroll', handleScroll);
     return () => window.removeEventListener('scroll', handleScroll);
   }, []);
+
+  useEffect(() => {
+    setIsMobileMenuOpen(false);
+  }, [location.pathname]);
+
+  const getInitials = () => {
+    if (profile?.display_name) {
+      return profile.display_name.split(' ').map(n => n[0]).join('').toUpperCase().slice(0, 2);
+    }
+    if (user?.email) {
+      return user.email[0].toUpperCase();
+    }
+    return 'U';
+  };
 
   useEffect(() => {
     setIsMobileMenuOpen(false);
@@ -82,21 +106,61 @@ export function Header() {
                 <Search className="w-5 h-5" />
               </button>
 
-              <Link
-                to="/signin"
-                className="hidden sm:block text-sm font-medium text-muted-foreground hover:text-accent transition-colors duration-200"
-              >
-                Sign In
-              </Link>
+              {user ? (
+                <DropdownMenu>
+                  <DropdownMenuTrigger asChild>
+                    <button className="flex items-center gap-2 hover:opacity-80 transition-opacity">
+                      <Avatar className="w-8 h-8">
+                        <AvatarImage src={profile?.avatar_url || undefined} />
+                        <AvatarFallback className="bg-accent text-accent-foreground text-sm">
+                          {getInitials()}
+                        </AvatarFallback>
+                      </Avatar>
+                    </button>
+                  </DropdownMenuTrigger>
+                  <DropdownMenuContent align="end" className="w-48">
+                    <div className="px-2 py-1.5">
+                      <p className="text-sm font-medium truncate">
+                        {profile?.display_name || 'User'}
+                      </p>
+                      <p className="text-xs text-muted-foreground truncate">
+                        {user.email}
+                      </p>
+                    </div>
+                    <DropdownMenuSeparator />
+                    <DropdownMenuItem asChild>
+                      <Link to="/profile" className="cursor-pointer">
+                        <User className="w-4 h-4 mr-2" />
+                        Profile
+                      </Link>
+                    </DropdownMenuItem>
+                    <DropdownMenuSeparator />
+                    <DropdownMenuItem onClick={signOut} className="cursor-pointer text-destructive">
+                      <LogOut className="w-4 h-4 mr-2" />
+                      Sign Out
+                    </DropdownMenuItem>
+                  </DropdownMenuContent>
+                </DropdownMenu>
+              ) : (
+                <>
+                  <Link
+                    to="/auth/signin"
+                    className="hidden sm:block text-sm font-medium text-muted-foreground hover:text-accent transition-colors duration-200"
+                  >
+                    Sign In
+                  </Link>
 
-              <Button
-                variant="default"
-                size="sm"
-                className="hidden sm:inline-flex bg-accent hover:bg-accent/90 text-accent-foreground font-medium px-5"
-              >
-                Subscribe
-              </Button>
-
+                  <Link to="/auth/signup">
+                    <Button
+                      variant="default"
+                      size="sm"
+                      className="hidden sm:inline-flex bg-accent hover:bg-accent/90 text-accent-foreground font-medium px-5"
+                    >
+                      Sign Up
+                    </Button>
+                  </Link>
+                </>
+              )}
               {/* Mobile Menu Button */}
               <button
                 className="md:hidden p-2 text-muted-foreground hover:text-accent transition-colors duration-200"
@@ -154,18 +218,43 @@ export function Header() {
                 </Link>
               ))}
               <hr className="my-2 border-border" />
-              <Link
-                to="/signin"
-                className="px-4 py-3 text-base font-medium text-muted-foreground hover:text-accent hover:bg-accent/5 rounded-md transition-colors duration-200"
-              >
-                Sign In
-              </Link>
-              <Button
-                variant="default"
-                className="mt-2 bg-accent hover:bg-accent/90 text-accent-foreground font-medium"
-              >
-                Subscribe
-              </Button>
+              {user ? (
+                <>
+                  <div className="px-4 py-2">
+                    <p className="text-sm font-medium">{profile?.display_name || 'User'}</p>
+                    <p className="text-xs text-muted-foreground">{user.email}</p>
+                  </div>
+                  <Link
+                    to="/profile"
+                    className="px-4 py-3 text-base font-medium text-muted-foreground hover:text-accent hover:bg-accent/5 rounded-md transition-colors duration-200"
+                  >
+                    Profile
+                  </Link>
+                  <button
+                    onClick={signOut}
+                    className="px-4 py-3 text-base font-medium text-destructive hover:bg-destructive/5 rounded-md transition-colors duration-200 text-left"
+                  >
+                    Sign Out
+                  </button>
+                </>
+              ) : (
+                <>
+                  <Link
+                    to="/auth/signin"
+                    className="px-4 py-3 text-base font-medium text-muted-foreground hover:text-accent hover:bg-accent/5 rounded-md transition-colors duration-200"
+                  >
+                    Sign In
+                  </Link>
+                  <Link to="/auth/signup">
+                    <Button
+                      variant="default"
+                      className="mt-2 w-full bg-accent hover:bg-accent/90 text-accent-foreground font-medium"
+                    >
+                      Sign Up
+                    </Button>
+                  </Link>
+                </>
+              )}
             </nav>
           </div>
         </div>
