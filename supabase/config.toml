@@ -8,3 +8,6 @@ verify_jwt = false
 
 [functions.fetch-rss]
 verify_jwt = false
+
+[functions.process-articles]
+verify_jwt = false
