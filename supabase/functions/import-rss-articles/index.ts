@@ -5,173 +5,64 @@ const corsHeaders = {
   'Access-Control-Allow-Headers': 'authorization, x-client-info, apikey, content-type',
 };
 
-// Jacksonville local news RSS feeds
-const RSS_FEEDS = [
-  {
-    url: 'https://www.jacksonville.com/arcio/rss/category/news/?query=display_date:%5Bnow-2d+TO+now%5D+AND+revision.published:true&sort=display_date:desc&size=20',
-    source_name: 'Jacksonville.com',
-    category: 'Local'
-  },
-  {
-    url: 'https://www.news4jax.com/arcio/rss/category/news/local/?size=20',
-    source_name: 'News4Jax',
-    category: 'Local'
-  },
-  {
-    url: 'https://www.firstcoastnews.com/feeds/syndication/rss/news/local',
-    source_name: 'First Coast News',
-    category: 'Local'
-  }
-];
-
-// Fallback feeds if local ones fail
-const FALLBACK_FEEDS = [
-  {
-    url: 'https://rss.nytimes.com/services/xml/rss/nyt/US.xml',
-    source_name: 'NY Times',
-    category: 'Local'
-  },
-  {
-    url: 'https://feeds.npr.org/1001/rss.xml',
-    source_name: 'NPR',
-    category: 'Local'
-  }
-];
-
-interface RSSItem {
+interface NewsAPIArticle {
+  source: { id: string | null; name: string };
+  author: string | null;
   title: string;
-  link: string;
-  description?: string;
-  pubDate?: string;
-  enclosure?: string;
-  category?: string;
-  source_name?: string;
-}
-
-function parseRSSXml(xml: string): RSSItem[] {
-  const items: RSSItem[] = [];
-  
-  // Simple regex-based XML parsing for RSS items
-  const itemMatches = xml.match(/<item[^>]*>[\s\S]*?<\/item>/gi) || [];
-  
-  for (const itemXml of itemMatches) {
-    const getTagContent = (tag: string): string | undefined => {
-      // Handle CDATA sections
-      const cdataMatch = itemXml.match(new RegExp(`<${tag}[^>]*><!\\[CDATA\\[([\\s\\S]*?)\\]\\]><\\/${tag}>`, 'i'));
-      if (cdataMatch) return cdataMatch[1].trim();
-      
-      const match = itemXml.match(new RegExp(`<${tag}[^>]*>([\\s\\S]*?)<\\/${tag}>`, 'i'));
-      return match ? match[1].trim().replace(/<!\[CDATA\[([\s\S]*?)\]\]>/g, '$1') : undefined;
-    };
-    
-    const getEnclosure = (): string | undefined => {
-      const match = itemXml.match(/<enclosure[^>]*url=["']([^"']+)["'][^>]*>/i);
-      if (match) return match[1];
-      
-      // Try media:content
-      const mediaMatch = itemXml.match(/<media:content[^>]*url=["']([^"']+)["'][^>]*>/i);
-      if (mediaMatch) return mediaMatch[1];
-      
-      // Try media:thumbnail
-      const thumbMatch = itemXml.match(/<media:thumbnail[^>]*url=["']([^"']+)["'][^>]*>/i);
-      return thumbMatch ? thumbMatch[1] : undefined;
-    };
-    
-    const title = getTagContent('title');
-    const link = getTagContent('link') || getTagContent('guid');
-    
-    if (title && link) {
-      items.push({
-        title: decodeHtmlEntities(title),
-        link: link,
-        description: getTagContent('description') ? decodeHtmlEntities(getTagContent('description')!) : undefined,
-        pubDate: getTagContent('pubDate'),
-        enclosure: getEnclosure(),
-        category: getTagContent('category')
-      });
-    }
-  }
-  
-  return items;
-}
-
-function decodeHtmlEntities(text: string): string {
-  return text
-    .replace(/&amp;/g, '&')
-    .replace(/&lt;/g, '<')
-    .replace(/&gt;/g, '>')
-    .replace(/&quot;/g, '"')
-    .replace(/&#39;/g, "'")
-    .replace(/&apos;/g, "'")
-    .replace(/<[^>]*>/g, '') // Strip HTML tags
-    .trim();
+  description: string | null;
+  url: string;
+  urlToImage: string | null;
+  publishedAt: string;
+  content: string | null;
 }
 
 function createSlug(title: string): string {
-  return title
+  const baseSlug = title
     .toLowerCase()
-    .replace(/[^a-z0-9\s-]/g, '')
-    .replace(/\s+/g, '-')
-    .replace(/-+/g, '-')
-    .substring(0, 100)
-    + '-' + Date.now().toString(36);
+    .replace(/[^a-z0-9]+/g, '-')
+    .replace(/(^-|-$)/g, '')
+    .substring(0, 80);
+  const randomSuffix = Math.random().toString(36).substring(2, 10);
+  return `${baseSlug}-${randomSuffix}`;
 }
 
-function categorizeArticle(title: string, description?: string, category?: string): string {
-  const text = `${title} ${description || ''} ${category || ''}`.toLowerCase();
+function categorizeArticle(title: string, description?: string): string {
+  const text = `${title} ${description || ''}`.toLowerCase();
   
-  if (text.includes('crime') || text.includes('arrest') || text.includes('police') || text.includes('shooting')) {
+  if (text.includes('crime') || text.includes('arrest') || text.includes('police') || 
+      text.includes('murder') || text.includes('shooting') || text.includes('robbery')) {
     return 'Crime';
   }
-  if (text.includes('politic') || text.includes('election') || text.includes('vote') || text.includes('mayor') || text.includes('council')) {
-    return 'Politics';
-  }
-  if (text.includes('business') || text.includes('econom') || text.includes('market') || text.includes('company')) {
+  if (text.includes('business') || text.includes('economy') || text.includes('market') || 
+      text.includes('company') || text.includes('stock')) {
     return 'Business';
   }
-  if (text.includes('sport') || text.includes('jaguar') || text.includes('game') || text.includes('player')) {
+  if (text.includes('sport') || text.includes('jaguars') || text.includes('football') || 
+      text.includes('basketball') || text.includes('game') || text.includes('team')) {
     return 'Sports';
   }
-  if (text.includes('weather') || text.includes('storm') || text.includes('hurricane') || text.includes('rain')) {
-    return 'Weather';
+  if (text.includes('school') || text.includes('education') || text.includes('student') || 
+      text.includes('university') || text.includes('college')) {
+    return 'Education';
   }
-  if (text.includes('traffic') || text.includes('road') || text.includes('highway') || text.includes('accident')) {
+  if (text.includes('traffic') || text.includes('road') || text.includes('highway') || 
+      text.includes('crash') || text.includes('accident')) {
     return 'Traffic';
   }
-  if (text.includes('entertain') || text.includes('movie') || text.includes('music') || text.includes('concert')) {
+  if (text.includes('weather') || text.includes('storm') || text.includes('hurricane') || 
+      text.includes('rain') || text.includes('temperature')) {
+    return 'Weather';
+  }
+  if (text.includes('food') || text.includes('restaurant') || text.includes('dining') || 
+      text.includes('chef') || text.includes('menu')) {
+    return 'Food';
+  }
+  if (text.includes('entertainment') || text.includes('movie') || text.includes('music') || 
+      text.includes('concert') || text.includes('show')) {
     return 'Entertainment';
   }
   
   return 'Local';
-}
-
-async function fetchFeed(feed: typeof RSS_FEEDS[0]): Promise<RSSItem[]> {
-  try {
-    console.log(`Fetching ${feed.source_name}...`);
-    const response = await fetch(feed.url, {
-      headers: {
-        'User-Agent': 'Mozilla/5.0 (compatible; 904News/1.0)',
-        'Accept': 'application/rss+xml, application/xml, text/xml, */*'
-      }
-    });
-    
-    if (!response.ok) {
-      console.log(`Failed to fetch ${feed.source_name}: ${response.status}`);
-      return [];
-    }
-    
-    const xml = await response.text();
-    const items = parseRSSXml(xml);
-    console.log(`Found ${items.length} items from ${feed.source_name}`);
-    
-    return items.map(item => ({
-      ...item,
-      source_name: feed.source_name
-    }));
-  } catch (error) {
-    console.log(`Error fetching ${feed.source_name}:`, error);
-    return [];
-  }
 }
 
 Deno.serve(async (req) => {
@@ -180,96 +71,167 @@ Deno.serve(async (req) => {
   }
 
   try {
+    const NEWS_API_KEY = Deno.env.get('NEWS_API_KEY');
+    if (!NEWS_API_KEY) {
+      throw new Error('NEWS_API_KEY not configured');
+    }
+
     const supabaseUrl = Deno.env.get('SUPABASE_URL')!;
     const supabaseServiceKey = Deno.env.get('SUPABASE_SERVICE_ROLE_KEY')!;
-    
     const supabase = createClient(supabaseUrl, supabaseServiceKey);
-    
-    // Fetch from all feeds in parallel
-    let allItems: RSSItem[] = [];
-    
-    // Try primary feeds first
-    const primaryResults = await Promise.all(RSS_FEEDS.map(fetchFeed));
-    allItems = primaryResults.flat();
-    
-    // If we don't have enough articles, try fallback feeds
-    if (allItems.length < 10) {
-      console.log('Not enough articles from primary feeds, trying fallbacks...');
-      const fallbackResults = await Promise.all(FALLBACK_FEEDS.map(fetchFeed));
-      allItems = [...allItems, ...fallbackResults.flat()];
+
+    // Fetch US top headlines and Florida/Jacksonville news
+    const searchQueries = [
+      'Jacksonville Florida',
+      'Florida news',
+    ];
+
+    let allArticles: NewsAPIArticle[] = [];
+
+    // First get top US headlines
+    console.log('Fetching US top headlines...');
+    const headlinesResponse = await fetch(
+      `https://newsapi.org/v2/top-headlines?country=us&pageSize=20`,
+      {
+        headers: {
+          'X-Api-Key': NEWS_API_KEY,
+        },
+      }
+    );
+
+    if (headlinesResponse.ok) {
+      const headlinesData = await headlinesResponse.json();
+      console.log(`Got ${headlinesData.articles?.length || 0} top headlines`);
+      if (headlinesData.articles) {
+        allArticles = [...headlinesData.articles];
+      }
+    } else {
+      console.log(`Headlines request failed: ${headlinesResponse.status}`);
     }
-    
-    console.log(`Total items fetched: ${allItems.length}`);
-    
-    // Take up to 20 articles
-    const articlesToImport = allItems.slice(0, 20);
-    
-    // Get existing article URLs to avoid duplicates
+
+    // Then search for local news
+    for (const query of searchQueries) {
+      if (allArticles.length >= 40) break;
+
+      console.log(`Searching for: ${query}`);
+      const response = await fetch(
+        `https://newsapi.org/v2/everything?q=${encodeURIComponent(query)}&language=en&sortBy=publishedAt&pageSize=15`,
+        {
+          headers: {
+            'X-Api-Key': NEWS_API_KEY,
+          },
+        }
+      );
+
+      if (response.ok) {
+        const data = await response.json();
+        console.log(`Got ${data.articles?.length || 0} articles for "${query}"`);
+        if (data.articles) {
+          allArticles = [...allArticles, ...data.articles];
+        }
+      } else {
+        console.log(`Search request failed: ${response.status}`);
+      }
+    }
+
+    console.log(`Total articles fetched: ${allArticles.length}`);
+
+    // Filter out articles without titles or with "[Removed]" content
+    const validArticles = allArticles.filter(
+      (article) => 
+        article.title && 
+        article.title !== '[Removed]' && 
+        article.url &&
+        article.description !== '[Removed]'
+    );
+
+    // Remove duplicates by URL
+    const uniqueArticles = validArticles.reduce((acc, article) => {
+      if (!acc.find(a => a.url === article.url)) {
+        acc.push(article);
+      }
+      return acc;
+    }, [] as NewsAPIArticle[]);
+
+    console.log(`Valid unique articles: ${uniqueArticles.length}`);
+
+    // Check which articles already exist
+    const sourceUrls = uniqueArticles.map(a => a.url);
     const { data: existingArticles } = await supabase
       .from('articles')
       .select('source_url')
-      .not('source_url', 'is', null);
-    
+      .in('source_url', sourceUrls);
+
     const existingUrls = new Set(existingArticles?.map(a => a.source_url) || []);
-    
-    // Filter out duplicates
-    const newArticles = articlesToImport.filter(item => !existingUrls.has(item.link));
-    
+    const newArticles = uniqueArticles.filter(a => !existingUrls.has(a.url));
+
     console.log(`New articles to import: ${newArticles.length}`);
-    
-    // Insert articles
-    const insertedArticles: Array<{ id: string; title: string; source_name: string }> = [];
-    for (const item of newArticles) {
-      const category = categorizeArticle(item.title, item.description, item.category);
-      const excerpt = item.description?.substring(0, 300) || null;
-      
-      const result = await supabase
-        .from('articles')
-        .insert({
-          title: item.title,
-          slug: createSlug(item.title),
-          excerpt: excerpt,
-          content: item.description || null,
-          source_name: item.source_name || 'Unknown',
-          source_url: item.link,
-          image_url: item.enclosure || null,
-          category: category,
-          status: 'active',
-          content_type: 'aggregated',
-          published_at: item.pubDate ? new Date(item.pubDate).toISOString() : new Date().toISOString(),
-          is_featured: insertedArticles.length === 0, // First article is featured
-          is_breaking: false
-        })
-        .select('id, title, source_name')
-        .single();
-      
-      if (result.error) {
-        console.log(`Error inserting article: ${result.error.message}`);
-      } else if (result.data) {
-        insertedArticles.push(result.data);
-      }
+
+    // Take only first 20 new articles
+    const articlesToInsert = newArticles.slice(0, 20);
+
+    if (articlesToInsert.length === 0) {
+      return new Response(
+        JSON.stringify({ 
+          success: true, 
+          message: 'No new articles to import',
+          imported: 0 
+        }),
+        { headers: { ...corsHeaders, 'Content-Type': 'application/json' } }
+      );
     }
-    
+
+    // Insert articles
+    const insertData = articlesToInsert.map((article, index) => ({
+      title: article.title,
+      slug: createSlug(article.title),
+      excerpt: article.description || article.title,
+      content: article.content || article.description || article.title,
+      source_url: article.url,
+      source_name: article.source.name || 'NewsAPI',
+      image_url: article.urlToImage,
+      category: categorizeArticle(article.title, article.description || ''),
+      published_at: article.publishedAt,
+      status: 'active',
+      content_type: 'aggregated',
+      is_featured: index === 0,
+      is_breaking: false,
+      view_count: 0,
+      upvotes: 0,
+      comment_count: 0,
+    }));
+
+    const { data: inserted, error: insertError } = await supabase
+      .from('articles')
+      .insert(insertData)
+      .select();
+
+    if (insertError) {
+      throw insertError;
+    }
+
+    console.log(`Successfully imported ${inserted?.length || 0} articles`);
+
     return new Response(
       JSON.stringify({
         success: true,
-        message: `Imported ${insertedArticles.length} new articles`,
-        articles: insertedArticles.map(a => ({ id: a.id, title: a.title, source: a.source_name }))
+        message: `Successfully imported ${inserted?.length || 0} articles from NewsAPI`,
+        imported: inserted?.length || 0,
+        articles: inserted?.map(a => ({ title: a.title, category: a.category })),
+      }),
+      { headers: { ...corsHeaders, 'Content-Type': 'application/json' } }
+    );
+  } catch (error: unknown) {
+    console.error('Error importing articles:', error);
+    const errorMessage = error instanceof Error ? error.message : 'Unknown error';
+    return new Response(
+      JSON.stringify({ 
+        success: false, 
+        error: errorMessage 
       }),
       { 
-        headers: { ...corsHeaders, 'Content-Type': 'application/json' },
-        status: 200 
-      }
-    );
-    
-  } catch (err) {
-    console.error('Error:', err);
-    const errorMessage = err instanceof Error ? err.message : 'Unknown error';
-    return new Response(
-      JSON.stringify({ success: false, error: errorMessage }),
-      { 
-        headers: { ...corsHeaders, 'Content-Type': 'application/json' },
-        status: 500 
+        status: 500, 
+        headers: { ...corsHeaders, 'Content-Type': 'application/json' } 
       }
     );
   }
