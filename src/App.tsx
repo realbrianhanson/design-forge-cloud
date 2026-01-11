@@ -24,6 +24,7 @@ import AdminDashboard from "./pages/admin/AdminDashboard";
 import AdminArticles from "./pages/admin/AdminArticles";
 import AdminEvents from "./pages/admin/AdminEvents";
 import AdminBusinesses from "./pages/admin/AdminBusinesses";
+import AdminAI from "./pages/admin/AdminAI";
 import NotFound from "./pages/NotFound";
 
 const queryClient = new QueryClient();
@@ -60,6 +61,7 @@ const App = () => (
             <Route path="/admin/articles" element={<AdminArticles />} />
             <Route path="/admin/events" element={<AdminEvents />} />
             <Route path="/admin/businesses" element={<AdminBusinesses />} />
+            <Route path="/admin/ai" element={<AdminAI />} />
             {/* Legacy routes - redirect to new auth paths */}
             <Route path="/signin" element={<SignIn />} />
             <Route path="/signup" element={<SignUp />} />

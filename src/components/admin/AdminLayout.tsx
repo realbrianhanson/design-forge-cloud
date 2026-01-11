@@ -11,7 +11,8 @@ import {
   Mail, 
   Settings,
   LogOut,
-  Shield
+  Shield,
+  Sparkles
 } from 'lucide-react';
 import { Avatar, AvatarFallback, AvatarImage } from '@/components/ui/avatar';
 import { Button } from '@/components/ui/button';
@@ -28,6 +29,7 @@ const navItems = [
   { path: '/admin/businesses', label: 'Businesses', icon: Building2 },
   { path: '/admin/users', label: 'Users', icon: Users },
   { path: '/admin/newsletter', label: 'Newsletter', icon: Mail },
+  { path: '/admin/ai', label: 'AI Processing', icon: Sparkles },
   { path: '/admin/settings', label: 'Settings', icon: Settings },
 ];
 
