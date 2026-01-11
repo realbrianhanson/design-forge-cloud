@@ -26,3 +26,6 @@ verify_jwt = false
 
 [functions.import-rss-articles]
 verify_jwt = false
+
+[functions.geocode-address]
+verify_jwt = false
