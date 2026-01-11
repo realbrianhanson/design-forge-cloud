@@ -103,6 +103,12 @@ const AdminData = () => {
               <CardDescription>News source aggregation</CardDescription>
             </div>
             <div className="flex gap-2">
+              <Link to="/admin/data/rss">
+                <Button size="sm" variant="outline">
+                  <Plus className="w-4 h-4 mr-1" />
+                  Manage
+                </Button>
+              </Link>
               <Button 
                 size="sm" 
                 variant="outline"
@@ -506,12 +512,22 @@ const AdminData = () => {
 
       {/* Action Log */}
       <Card className="bg-white">
-        <CardHeader>
-          <CardTitle className="text-lg flex items-center gap-2">
-            <Clock className="w-5 h-5 text-slate-500" />
-            Recent Actions
-          </CardTitle>
-          <CardDescription>Latest data operations and system events</CardDescription>
+        <CardHeader className="flex flex-row items-center justify-between">
+          <div>
+            <CardTitle className="text-lg flex items-center gap-2">
+              <Clock className="w-5 h-5 text-slate-500" />
+              Recent Actions
+            </CardTitle>
+            <CardDescription>Latest data operations and system events</CardDescription>
+          </div>
+          <div className="flex gap-2">
+            <Link to="/admin/data/api-keys">
+              <Button size="sm" variant="outline">API Keys</Button>
+            </Link>
+            <Link to="/admin/data/logs">
+              <Button size="sm" variant="outline">View All Logs</Button>
+            </Link>
+          </div>
         </CardHeader>
         <CardContent>
           {actionLogs.isLoading ? (

@@ -29,6 +29,9 @@ import NotificationSettings from "./pages/settings/NotificationSettings";
 import AccountSettings from "./pages/settings/AccountSettings";
 import AdminDashboard from "./pages/admin/AdminDashboard";
 import AdminData from "./pages/admin/AdminData";
+import AdminRssSources from "./pages/admin/AdminRssSources";
+import AdminApiKeys from "./pages/admin/AdminApiKeys";
+import AdminLogs from "./pages/admin/AdminLogs";
 import AdminArticles from "./pages/admin/AdminArticles";
 import AdminEvents from "./pages/admin/AdminEvents";
 import AdminBusinesses from "./pages/admin/AdminBusinesses";
@@ -96,6 +99,9 @@ const App = () => (
                   {/* Admin Routes */}
                   <Route path="/admin" element={<AdminDashboard />} />
                   <Route path="/admin/data" element={<AdminData />} />
+                  <Route path="/admin/data/rss" element={<AdminRssSources />} />
+                  <Route path="/admin/data/api-keys" element={<AdminApiKeys />} />
+                  <Route path="/admin/data/logs" element={<AdminLogs />} />
                   <Route path="/admin/articles" element={<AdminArticles />} />
                   <Route path="/admin/events" element={<AdminEvents />} />
                   <Route path="/admin/businesses" element={<AdminBusinesses />} />

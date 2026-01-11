@@ -516,6 +516,42 @@ export type Database = {
           },
         ]
       }
+      data_operation_logs: {
+        Row: {
+          created_at: string
+          details: string | null
+          duration_ms: number | null
+          error_message: string | null
+          id: string
+          metadata: Json | null
+          operation_name: string
+          operation_type: string
+          status: string
+        }
+        Insert: {
+          created_at?: string
+          details?: string | null
+          duration_ms?: number | null
+          error_message?: string | null
+          id?: string
+          metadata?: Json | null
+          operation_name: string
+          operation_type: string
+          status?: string
+        }
+        Update: {
+          created_at?: string
+          details?: string | null
+          duration_ms?: number | null
+          error_message?: string | null
+          id?: string
+          metadata?: Json | null
+          operation_name?: string
+          operation_type?: string
+          status?: string
+        }
+        Relationships: []
+      }
       event_reminders: {
         Row: {
           created_at: string
