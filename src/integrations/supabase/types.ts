@@ -791,6 +791,141 @@ export type Database = {
         }
         Relationships: []
       }
+      weather_alerts: {
+        Row: {
+          alert_id: string
+          areas: string[] | null
+          created_at: string | null
+          description: string | null
+          effective_at: string | null
+          event: string
+          expires_at: string | null
+          headline: string | null
+          id: string
+          instruction: string | null
+          severity: string | null
+          status: string | null
+          urgency: string | null
+        }
+        Insert: {
+          alert_id: string
+          areas?: string[] | null
+          created_at?: string | null
+          description?: string | null
+          effective_at?: string | null
+          event: string
+          expires_at?: string | null
+          headline?: string | null
+          id?: string
+          instruction?: string | null
+          severity?: string | null
+          status?: string | null
+          urgency?: string | null
+        }
+        Update: {
+          alert_id?: string
+          areas?: string[] | null
+          created_at?: string | null
+          description?: string | null
+          effective_at?: string | null
+          event?: string
+          expires_at?: string | null
+          headline?: string | null
+          id?: string
+          instruction?: string | null
+          severity?: string | null
+          status?: string | null
+          urgency?: string | null
+        }
+        Relationships: []
+      }
+      weather_current: {
+        Row: {
+          conditions: string | null
+          conditions_icon: string | null
+          feels_like_f: number | null
+          humidity: number | null
+          id: string
+          location: string
+          temperature_c: number | null
+          temperature_f: number | null
+          updated_at: string | null
+          wind_direction: string | null
+          wind_speed: string | null
+        }
+        Insert: {
+          conditions?: string | null
+          conditions_icon?: string | null
+          feels_like_f?: number | null
+          humidity?: number | null
+          id?: string
+          location?: string
+          temperature_c?: number | null
+          temperature_f?: number | null
+          updated_at?: string | null
+          wind_direction?: string | null
+          wind_speed?: string | null
+        }
+        Update: {
+          conditions?: string | null
+          conditions_icon?: string | null
+          feels_like_f?: number | null
+          humidity?: number | null
+          id?: string
+          location?: string
+          temperature_c?: number | null
+          temperature_f?: number | null
+          updated_at?: string | null
+          wind_direction?: string | null
+          wind_speed?: string | null
+        }
+        Relationships: []
+      }
+      weather_forecast: {
+        Row: {
+          conditions: string | null
+          conditions_icon: string | null
+          created_at: string | null
+          detailed_forecast: string | null
+          forecast_date: string
+          id: string
+          is_daytime: boolean | null
+          location: string
+          period_name: string
+          precipitation_chance: number | null
+          temperature: number | null
+          temperature_unit: string | null
+        }
+        Insert: {
+          conditions?: string | null
+          conditions_icon?: string | null
+          created_at?: string | null
+          detailed_forecast?: string | null
+          forecast_date: string
+          id?: string
+          is_daytime?: boolean | null
+          location?: string
+          period_name: string
+          precipitation_chance?: number | null
+          temperature?: number | null
+          temperature_unit?: string | null
+        }
+        Update: {
+          conditions?: string | null
+          conditions_icon?: string | null
+          created_at?: string | null
+          detailed_forecast?: string | null
+          forecast_date?: string
+          id?: string
+          is_daytime?: boolean | null
+          location?: string
+          period_name?: string
+          precipitation_chance?: number | null
+          temperature?: number | null
+          temperature_unit?: string | null
+        }
+        Relationships: []
+      }
     }
     Views: {
       [_ in never]: never

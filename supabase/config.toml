@@ -17,3 +17,6 @@ verify_jwt = false
 
 [functions.fetch-crime-data]
 verify_jwt = false
+
+[functions.fetch-weather]
+verify_jwt = false
