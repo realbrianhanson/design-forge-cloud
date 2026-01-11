@@ -25,6 +25,10 @@ import AdminArticles from "./pages/admin/AdminArticles";
 import AdminEvents from "./pages/admin/AdminEvents";
 import AdminBusinesses from "./pages/admin/AdminBusinesses";
 import AdminAI from "./pages/admin/AdminAI";
+import AdminNewsletter from "./pages/admin/AdminNewsletter";
+import NewsletterPage from "./pages/newsletter/NewsletterPage";
+import NewsletterVerify from "./pages/newsletter/NewsletterVerify";
+import NewsletterUnsubscribe from "./pages/newsletter/NewsletterUnsubscribe";
 import NotFound from "./pages/NotFound";
 
 const queryClient = new QueryClient();
@@ -62,6 +66,11 @@ const App = () => (
             <Route path="/admin/events" element={<AdminEvents />} />
             <Route path="/admin/businesses" element={<AdminBusinesses />} />
             <Route path="/admin/ai" element={<AdminAI />} />
+            <Route path="/admin/newsletter" element={<AdminNewsletter />} />
+            {/* Newsletter Routes */}
+            <Route path="/newsletter" element={<NewsletterPage />} />
+            <Route path="/newsletter/verify" element={<NewsletterVerify />} />
+            <Route path="/newsletter/unsubscribe" element={<NewsletterUnsubscribe />} />
             {/* Legacy routes - redirect to new auth paths */}
             <Route path="/signin" element={<SignIn />} />
             <Route path="/signup" element={<SignUp />} />
