@@ -28,6 +28,7 @@ import NeighborhoodSettings from "./pages/settings/NeighborhoodSettings";
 import NotificationSettings from "./pages/settings/NotificationSettings";
 import AccountSettings from "./pages/settings/AccountSettings";
 import AdminDashboard from "./pages/admin/AdminDashboard";
+import AdminData from "./pages/admin/AdminData";
 import AdminArticles from "./pages/admin/AdminArticles";
 import AdminEvents from "./pages/admin/AdminEvents";
 import AdminBusinesses from "./pages/admin/AdminBusinesses";
@@ -94,6 +95,7 @@ const App = () => (
                   <Route path="/profile" element={<ProfileSettings />} />
                   {/* Admin Routes */}
                   <Route path="/admin" element={<AdminDashboard />} />
+                  <Route path="/admin/data" element={<AdminData />} />
                   <Route path="/admin/articles" element={<AdminArticles />} />
                   <Route path="/admin/events" element={<AdminEvents />} />
                   <Route path="/admin/businesses" element={<AdminBusinesses />} />
