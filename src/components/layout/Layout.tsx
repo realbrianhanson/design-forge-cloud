@@ -7,9 +7,10 @@ import { MobileDrawer } from './MobileDrawer';
 interface LayoutProps {
   children: ReactNode;
   hideBottomNav?: boolean;
+  hideFooter?: boolean;
 }
 
-export function Layout({ children, hideBottomNav = false }: LayoutProps) {
+export function Layout({ children, hideBottomNav = false, hideFooter = false }: LayoutProps) {
   const [isDrawerOpen, setIsDrawerOpen] = useState(false);
 
   return (
@@ -18,9 +19,11 @@ export function Layout({ children, hideBottomNav = false }: LayoutProps) {
       <main className="flex-1 pb-16 md:pb-0">
         {children}
       </main>
-      <div className="hidden md:block">
-        <Footer />
-      </div>
+      {!hideFooter && (
+        <div className="hidden md:block">
+          <Footer />
+        </div>
+      )}
       {!hideBottomNav && (
         <BottomTabBar onMenuClick={() => setIsDrawerOpen(true)} />
       )}
