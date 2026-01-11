@@ -16,6 +16,10 @@ import AddBusiness from "./pages/AddBusiness";
 import SignIn from "./pages/auth/SignIn";
 import SignUp from "./pages/auth/SignUp";
 import ForgotPassword from "./pages/auth/ForgotPassword";
+import ProfileSettings from "./pages/settings/ProfileSettings";
+import NeighborhoodSettings from "./pages/settings/NeighborhoodSettings";
+import NotificationSettings from "./pages/settings/NotificationSettings";
+import AccountSettings from "./pages/settings/AccountSettings";
 import NotFound from "./pages/NotFound";
 
 const queryClient = new QueryClient();
@@ -40,6 +44,13 @@ const App = () => (
             <Route path="/auth/signin" element={<SignIn />} />
             <Route path="/auth/signup" element={<SignUp />} />
             <Route path="/auth/forgot-password" element={<ForgotPassword />} />
+            {/* Settings Routes */}
+            <Route path="/settings" element={<ProfileSettings />} />
+            <Route path="/settings/profile" element={<ProfileSettings />} />
+            <Route path="/settings/neighborhoods" element={<NeighborhoodSettings />} />
+            <Route path="/settings/notifications" element={<NotificationSettings />} />
+            <Route path="/settings/account" element={<AccountSettings />} />
+            <Route path="/profile" element={<ProfileSettings />} />
             {/* Legacy routes - redirect to new auth paths */}
             <Route path="/signin" element={<SignIn />} />
             <Route path="/signup" element={<SignUp />} />
