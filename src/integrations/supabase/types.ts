@@ -645,33 +645,57 @@ export type Database = {
       }
       neighborhoods: {
         Row: {
+          boundaries: Json | null
           created_at: string | null
           description: string | null
           display_order: number | null
+          established: string | null
+          external_links: Json | null
+          hero_image_url: string | null
+          highlights: string[] | null
           id: string
           image_url: string | null
           name: string
+          population: number | null
           slug: string
+          thumbnail_url: string | null
+          vibe: string | null
           zip_codes: string[] | null
         }
         Insert: {
+          boundaries?: Json | null
           created_at?: string | null
           description?: string | null
           display_order?: number | null
+          established?: string | null
+          external_links?: Json | null
+          hero_image_url?: string | null
+          highlights?: string[] | null
           id?: string
           image_url?: string | null
           name: string
+          population?: number | null
           slug: string
+          thumbnail_url?: string | null
+          vibe?: string | null
           zip_codes?: string[] | null
         }
         Update: {
+          boundaries?: Json | null
           created_at?: string | null
           description?: string | null
           display_order?: number | null
+          established?: string | null
+          external_links?: Json | null
+          hero_image_url?: string | null
+          highlights?: string[] | null
           id?: string
           image_url?: string | null
           name?: string
+          population?: number | null
           slug?: string
+          thumbnail_url?: string | null
+          vibe?: string | null
           zip_codes?: string[] | null
         }
         Relationships: []
