@@ -338,6 +338,109 @@ export type Database = {
           },
         ]
       }
+      crime_incidents: {
+        Row: {
+          address: string | null
+          created_at: string | null
+          description: string | null
+          id: string
+          incident_category: string | null
+          incident_number: string
+          incident_type: string
+          latitude: number | null
+          longitude: number | null
+          neighborhood_id: string | null
+          occurred_at: string | null
+          raw_data: Json | null
+          reported_at: string | null
+          source_url: string | null
+          status: string | null
+          updated_at: string | null
+          zone: string | null
+        }
+        Insert: {
+          address?: string | null
+          created_at?: string | null
+          description?: string | null
+          id?: string
+          incident_category?: string | null
+          incident_number: string
+          incident_type: string
+          latitude?: number | null
+          longitude?: number | null
+          neighborhood_id?: string | null
+          occurred_at?: string | null
+          raw_data?: Json | null
+          reported_at?: string | null
+          source_url?: string | null
+          status?: string | null
+          updated_at?: string | null
+          zone?: string | null
+        }
+        Update: {
+          address?: string | null
+          created_at?: string | null
+          description?: string | null
+          id?: string
+          incident_category?: string | null
+          incident_number?: string
+          incident_type?: string
+          latitude?: number | null
+          longitude?: number | null
+          neighborhood_id?: string | null
+          occurred_at?: string | null
+          raw_data?: Json | null
+          reported_at?: string | null
+          source_url?: string | null
+          status?: string | null
+          updated_at?: string | null
+          zone?: string | null
+        }
+        Relationships: [
+          {
+            foreignKeyName: "crime_incidents_neighborhood_id_fkey"
+            columns: ["neighborhood_id"]
+            isOneToOne: false
+            referencedRelation: "neighborhoods"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      crime_stats_daily: {
+        Row: {
+          count: number
+          created_at: string | null
+          date: string
+          id: string
+          incident_type: string
+          neighborhood_id: string | null
+        }
+        Insert: {
+          count?: number
+          created_at?: string | null
+          date: string
+          id?: string
+          incident_type: string
+          neighborhood_id?: string | null
+        }
+        Update: {
+          count?: number
+          created_at?: string | null
+          date?: string
+          id?: string
+          incident_type?: string
+          neighborhood_id?: string | null
+        }
+        Relationships: [
+          {
+            foreignKeyName: "crime_stats_daily_neighborhood_id_fkey"
+            columns: ["neighborhood_id"]
+            isOneToOne: false
+            referencedRelation: "neighborhoods"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       events: {
         Row: {
           category: string
