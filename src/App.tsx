@@ -18,6 +18,8 @@ import EventSubmit from "./pages/EventSubmit";
 import Businesses from "./pages/Businesses";
 import BusinessDetail from "./pages/BusinessDetail";
 import AddBusiness from "./pages/AddBusiness";
+import Neighborhoods from "./pages/Neighborhoods";
+import NeighborhoodDetail from "./pages/NeighborhoodDetail";
 import SignIn from "./pages/auth/SignIn";
 import SignUp from "./pages/auth/SignUp";
 import ForgotPassword from "./pages/auth/ForgotPassword";
@@ -72,6 +74,8 @@ const App = () => (
                   <Route path="/businesses/add" element={<AddBusiness />} />
                   <Route path="/businesses/:slug" element={<BusinessDetail />} />
                   <Route path="/business/:slug" element={<BusinessDetail />} />
+                  <Route path="/neighborhoods" element={<Neighborhoods />} />
+                  <Route path="/neighborhoods/:slug" element={<NeighborhoodDetail />} />
                   <Route path="/search" element={<Search />} />
                   <Route path="/crime" element={<CrimeMap />} />
                   <Route path="/news/crime-map" element={<CrimeMap />} />
