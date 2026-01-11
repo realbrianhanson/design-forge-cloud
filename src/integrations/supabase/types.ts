@@ -169,31 +169,46 @@ export type Database = {
       }
       business_categories: {
         Row: {
+          description: string | null
           display_order: number | null
           icon: string | null
           id: string
           name: string
+          parent_id: string | null
           slug: string
         }
         Insert: {
+          description?: string | null
           display_order?: number | null
           icon?: string | null
           id?: string
           name: string
+          parent_id?: string | null
           slug: string
         }
         Update: {
+          description?: string | null
           display_order?: number | null
           icon?: string | null
           id?: string
           name?: string
+          parent_id?: string | null
           slug?: string
         }
-        Relationships: []
+        Relationships: [
+          {
+            foreignKeyName: "business_categories_parent_id_fkey"
+            columns: ["parent_id"]
+            isOneToOne: false
+            referencedRelation: "business_categories"
+            referencedColumns: ["id"]
+          },
+        ]
       }
       businesses: {
         Row: {
           address: string | null
+          amenities: string[] | null
           category: string
           city: string | null
           claimed: boolean | null
@@ -231,6 +246,7 @@ export type Database = {
         }
         Insert: {
           address?: string | null
+          amenities?: string[] | null
           category: string
           city?: string | null
           claimed?: boolean | null
@@ -268,6 +284,7 @@ export type Database = {
         }
         Update: {
           address?: string | null
+          amenities?: string[] | null
           category?: string
           city?: string | null
           claimed?: boolean | null
