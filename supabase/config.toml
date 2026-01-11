@@ -11,3 +11,6 @@ verify_jwt = false
 
 [functions.process-articles]
 verify_jwt = false
+
+[functions.daily-news-pipeline]
+verify_jwt = false
