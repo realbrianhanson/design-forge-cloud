@@ -330,6 +330,39 @@ export type Database = {
           },
         ]
       }
+      city_event_imports: {
+        Row: {
+          error_message: string | null
+          events_created: number
+          events_fetched: number
+          events_skipped: number
+          events_updated: number
+          id: string
+          import_date: string
+          success: boolean
+        }
+        Insert: {
+          error_message?: string | null
+          events_created?: number
+          events_fetched?: number
+          events_skipped?: number
+          events_updated?: number
+          id?: string
+          import_date?: string
+          success?: boolean
+        }
+        Update: {
+          error_message?: string | null
+          events_created?: number
+          events_fetched?: number
+          events_skipped?: number
+          events_updated?: number
+          id?: string
+          import_date?: string
+          success?: boolean
+        }
+        Relationships: []
+      }
       comments: {
         Row: {
           author_id: string
