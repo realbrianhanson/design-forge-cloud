@@ -32,3 +32,6 @@ verify_jwt = false
 
 [functions.fetch-city-events]
 verify_jwt = false
+
+[functions.fetch-eventbrite-events]
+verify_jwt = false
