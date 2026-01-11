@@ -18,6 +18,25 @@ const JACKSONVILLE = {
 
 const NWS_USER_AGENT = "(904News, contact@904news.com)";
 
+// Alert types that should generate articles
+const ARTICLE_WORTHY_ALERTS = [
+  'hurricane warning',
+  'hurricane watch',
+  'tropical storm warning',
+  'tropical storm watch',
+  'storm surge warning',
+  'storm surge watch',
+  'tornado warning',
+  'tornado watch',
+  'severe thunderstorm warning',
+  'flash flood warning',
+  'flood warning',
+  'extreme heat warning',
+  'excessive heat warning',
+  'freeze warning',
+  'winter storm warning',
+];
+
 // Helper to fetch with retry
 async function fetchWithRetry(
   url: string,
@@ -201,6 +220,107 @@ async function fetchAlerts() {
   });
 }
 
+// Generate slug from title
+function generateSlug(title: string): string {
+  return title
+    .toLowerCase()
+    .replace(/[^a-z0-9\s-]/g, '')
+    .replace(/\s+/g, '-')
+    .replace(/-+/g, '-')
+    .slice(0, 100);
+}
+
+// Check if alert should generate an article
+function shouldGenerateArticle(event: string): boolean {
+  const eventLower = event.toLowerCase();
+  return ARTICLE_WORTHY_ALERTS.some(alertType => eventLower.includes(alertType));
+}
+
+// Create weather article from alert
+async function createWeatherArticle(
+  supabase: any,
+  alert: {
+    alert_id: string;
+    event: string;
+    severity: string;
+    headline: string;
+    description: string;
+    instruction: string | null;
+  }
+): Promise<string | null> {
+  // Check if article already exists for this alert
+  const { data: existing } = await supabase
+    .from("articles")
+    .select("id")
+    .eq("external_id", `weather-${alert.alert_id}`)
+    .maybeSingle();
+
+  if (existing) {
+    console.log(`Article already exists for alert: ${alert.event}`);
+    return null;
+  }
+
+  const isBreaking = alert.severity === 'severe' || alert.severity === 'extreme';
+  const timestamp = new Date().toISOString();
+  const dateStr = new Date().toLocaleDateString('en-US', { 
+    month: 'long', 
+    day: 'numeric', 
+    year: 'numeric' 
+  });
+
+  const title = `${alert.event} issued for Jacksonville area`;
+  const slug = generateSlug(`${title}-${Date.now()}`);
+  
+  const content = `
+## ${alert.headline || alert.event}
+
+${alert.description}
+
+${alert.instruction ? `### What You Should Do\n\n${alert.instruction}` : ''}
+
+### Stay Informed
+
+For the latest updates:
+- Monitor local news and weather services
+- Follow @NWSJacksonville on social media
+- Tune to NOAA Weather Radio (162.475 MHz)
+- Visit [JaxReady.com](https://www.jaxready.com) for emergency information
+
+*This article was automatically generated from a National Weather Service alert.*
+  `.trim();
+
+  const article = {
+    title,
+    slug,
+    excerpt: alert.headline || `A ${alert.event} has been issued for the Jacksonville metropolitan area.`,
+    content,
+    category: 'weather',
+    source_name: 'National Weather Service',
+    source_url: 'https://www.weather.gov/jax/',
+    external_id: `weather-${alert.alert_id}`,
+    is_breaking: isBreaking,
+    is_featured: isBreaking,
+    status: 'active',
+    published_at: timestamp,
+    created_at: timestamp,
+    content_type: 'aggregated',
+  };
+
+  const { data, error } = await supabase
+    .from("articles")
+    .insert(article)
+    .select("id")
+    .single();
+
+  if (error) {
+    console.error("Error creating weather article:", error);
+    return null;
+  }
+
+  console.log(`Created weather article: ${title} (ID: ${data.id})`);
+  return data.id;
+}
+
 Deno.serve(async (req) => {
   if (req.method === "OPTIONS") {
     return new Response(null, { headers: corsHeaders });
@@ -214,7 +334,7 @@ Deno.serve(async (req) => {
     const results = {
       current: { success: false, error: null as string | null },
       forecast: { success: false, count: 0, error: null as string | null },
-      alerts: { success: false, count: 0, newAlerts: 0, error: null as string | null },
+      alerts: { success: false, count: 0, newAlerts: 0, articlesCreated: 0, error: null as string | null },
     };
 
     // 1. Fetch and update current weather
@@ -264,7 +384,7 @@ Deno.serve(async (req) => {
       results.forecast.error = error instanceof Error ? error.message : "Unknown error";
     }
 
-    // 3. Fetch and update alerts
+    // 3. Fetch and update alerts + auto-generate articles
     try {
       const alerts = await fetchAlerts();
       
@@ -276,6 +396,7 @@ Deno.serve(async (req) => {
         .eq("status", "active");
 
       let newAlertCount = 0;
+      let articlesCreated = 0;
       
       for (const alert of alerts) {
         // Check if alert already exists
@@ -290,14 +411,23 @@ Deno.serve(async (req) => {
             .from("weather_alerts")
             .insert(alert);
           
-          if (!error) newAlertCount++;
+          if (!error) {
+            newAlertCount++;
+            
+            // Check if this alert should generate an article
+            if (shouldGenerateArticle(alert.event)) {
+              const articleId = await createWeatherArticle(supabase, alert);
+              if (articleId) articlesCreated++;
+            }
+          }
         }
       }
 
       results.alerts.success = true;
       results.alerts.count = alerts.length;
       results.alerts.newAlerts = newAlertCount;
-      console.log(`Alerts: ${alerts.length} active, ${newAlertCount} new`);
+      results.alerts.articlesCreated = articlesCreated;
+      console.log(`Alerts: ${alerts.length} active, ${newAlertCount} new, ${articlesCreated} articles created`);
     } catch (error) {
       console.error("Error fetching alerts:", error);
       results.alerts.error = error instanceof Error ? error.message : "Unknown error";

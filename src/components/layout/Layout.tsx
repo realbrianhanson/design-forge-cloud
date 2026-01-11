@@ -3,6 +3,7 @@ import { Header } from './Header';
 import { Footer } from './Footer';
 import { BottomTabBar } from './BottomTabBar';
 import { MobileDrawer } from './MobileDrawer';
+import { WeatherAlertBanner } from '@/components/weather/WeatherAlertBanner';
 
 interface LayoutProps {
   children: ReactNode;
@@ -15,6 +16,7 @@ export function Layout({ children, hideBottomNav = false, hideFooter = false }: 
 
   return (
     <div className="min-h-screen flex flex-col">
+      <WeatherAlertBanner />
       <Header onMenuClick={() => setIsDrawerOpen(true)} />
       <main className="flex-1 pb-16 md:pb-0">
         {children}
