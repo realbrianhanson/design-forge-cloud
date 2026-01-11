@@ -73,7 +73,7 @@ export function Header({ onMenuClick }: HeaderProps) {
               <img 
                 src={logo} 
                 alt="904 News" 
-                className="h-12 md:h-14 w-auto"
+                className="h-14 md:h-16 w-auto"
               />
             </Link>
 
