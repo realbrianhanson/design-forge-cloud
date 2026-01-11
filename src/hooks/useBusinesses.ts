@@ -41,6 +41,79 @@ export const useBusiness = (slug: string) => {
   });
 };
 
+// Fetch similar businesses (same category, same neighborhood)
+export const useSimilarBusinesses = (
+  category: string,
+  neighborhoodId: string | null,
+  excludeId: string,
+  limit: number = 4
+) => {
+  return useQuery({
+    queryKey: ['similar-businesses', category, neighborhoodId, excludeId, limit],
+    queryFn: async () => {
+      let query = supabase
+        .from('businesses')
+        .select('*')
+        .eq('status', 'active')
+        .eq('category', category)
+        .neq('id', excludeId)
+        .order('rating', { ascending: false, nullsFirst: false })
+        .limit(limit);
+
+      if (neighborhoodId) {
+        query = query.eq('neighborhood_id', neighborhoodId);
+      }
+
+      const { data, error } = await query;
+
+      if (error) throw error;
+
+      // If not enough results with same neighborhood, fetch more from same category
+      if (data.length < limit && neighborhoodId) {
+        const { data: moreData, error: moreError } = await supabase
+          .from('businesses')
+          .select('*')
+          .eq('status', 'active')
+          .eq('category', category)
+          .neq('id', excludeId)
+          .not('id', 'in', `(${data.map(b => b.id).join(',')})`)
+          .order('rating', { ascending: false, nullsFirst: false })
+          .limit(limit - data.length);
+
+        if (!moreError && moreData) {
+          return [...data, ...moreData] as Tables<'businesses'>[];
+        }
+      }
+
+      return data as Tables<'businesses'>[];
+    },
+    enabled: !!category && !!excludeId,
+    staleTime: 1000 * 60 * 10,
+  });
+};
+
+// Increment view count
+export const incrementBusinessViewCount = async (businessId: string) => {
+  // Use raw SQL to increment - silently fail if error
+  try {
+    const { data: business } = await supabase
+      .from('businesses')
+      .select('view_count')
+      .eq('id', businessId)
+      .single();
+
+    if (business) {
+      await supabase
+        .from('businesses')
+        .update({ view_count: (business.view_count || 0) + 1 })
+        .eq('id', businessId);
+    }
+  } catch (err) {
+    // Silently fail - not critical
+    console.error('Failed to increment view count:', err);
+  }
+};
+
 // Fetch business categories
 export const useBusinessCategories = () => {
   return useQuery({
