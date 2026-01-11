@@ -1,6 +1,6 @@
 import { useState } from 'react';
 import { useParams, Link } from 'react-router-dom';
-import { Newspaper, Calendar, Building2, Shield, Info, Plus, ChevronRight } from 'lucide-react';
+import { Newspaper, Calendar, Building2, Shield, Info, Plus, ChevronRight, ExternalLink, Users, Clock, MapPin } from 'lucide-react';
 import { Layout } from '@/components/layout/Layout';
 import { SEO } from '@/components/SEO';
 import { NeighborhoodHero, NeighborhoodHeroSkeleton } from '@/components/neighborhood/NeighborhoodHero';
@@ -278,11 +278,16 @@ const NeighborhoodDetail = () => {
               <TabsContent value="about" className="space-y-6">
                 <Card>
                   <CardHeader>
-                    <CardTitle>About {neighborhood.name}</CardTitle>
+                    <CardTitle className="flex items-center gap-2">
+                      About {neighborhood.name}
+                      {neighborhood.vibe && (
+                        <Badge variant="secondary">{neighborhood.vibe}</Badge>
+                      )}
+                    </CardTitle>
                   </CardHeader>
-                  <CardContent className="space-y-4">
+                  <CardContent className="space-y-6">
                     {neighborhood.description ? (
-                      <p className="text-muted-foreground leading-relaxed">
+                      <p className="text-muted-foreground leading-relaxed text-lg">
                         {neighborhood.description}
                       </p>
                     ) : (
@@ -291,19 +296,81 @@ const NeighborhoodDetail = () => {
                       </p>
                     )}
 
-                    {neighborhood.zip_codes && neighborhood.zip_codes.length > 0 && (
+                    {/* Key Info Grid */}
+                    <div className="grid grid-cols-1 sm:grid-cols-3 gap-4">
+                      {neighborhood.population && (
+                        <div className="bg-surface rounded-lg p-4">
+                          <div className="flex items-center gap-2 text-accent mb-1">
+                            <Users className="w-4 h-4" />
+                            <span className="text-sm font-medium">Population</span>
+                          </div>
+                          <p className="text-xl font-bold text-foreground">
+                            ~{neighborhood.population.toLocaleString()}
+                          </p>
+                        </div>
+                      )}
+                      {neighborhood.established && (
+                        <div className="bg-surface rounded-lg p-4">
+                          <div className="flex items-center gap-2 text-accent mb-1">
+                            <Clock className="w-4 h-4" />
+                            <span className="text-sm font-medium">Established</span>
+                          </div>
+                          <p className="text-xl font-bold text-foreground">
+                            {neighborhood.established}
+                          </p>
+                        </div>
+                      )}
+                      {neighborhood.zip_codes && neighborhood.zip_codes.length > 0 && (
+                        <div className="bg-surface rounded-lg p-4">
+                          <div className="flex items-center gap-2 text-accent mb-1">
+                            <MapPin className="w-4 h-4" />
+                            <span className="text-sm font-medium">ZIP Codes</span>
+                          </div>
+                          <p className="text-lg font-bold text-foreground">
+                            {neighborhood.zip_codes.join(', ')}
+                          </p>
+                        </div>
+                      )}
+                    </div>
+
+                    {/* Highlights */}
+                    {neighborhood.highlights && neighborhood.highlights.length > 0 && (
                       <div>
-                        <h4 className="font-medium text-foreground mb-2">ZIP Codes</h4>
+                        <h4 className="font-medium text-foreground mb-3">Notable Landmarks & Features</h4>
                         <div className="flex flex-wrap gap-2">
-                          {neighborhood.zip_codes.map((zip) => (
-                            <Badge key={zip} variant="secondary">{zip}</Badge>
+                          {neighborhood.highlights.map((highlight, i) => (
+                            <Badge key={i} variant="outline" className="text-sm py-1.5 px-3">
+                              {highlight}
+                            </Badge>
                           ))}
                         </div>
                       </div>
                     )}
 
+                    {/* External Links */}
+                    {neighborhood.external_links && Object.keys(neighborhood.external_links).length > 0 && (
+                      <div>
+                        <h4 className="font-medium text-foreground mb-3">Learn More</h4>
+                        <div className="flex flex-wrap gap-3">
+                          {Object.entries(neighborhood.external_links as Record<string, string>).map(([key, url]) => (
+                            <a
+                              key={key}
+                              href={url}
+                              target="_blank"
+                              rel="noopener noreferrer"
+                              className="inline-flex items-center gap-1.5 text-accent hover:text-accent/80 text-sm"
+                            >
+                              <ExternalLink className="w-4 h-4" />
+                              {key.replace(/_/g, ' ').replace(/\b\w/g, c => c.toUpperCase())}
+                            </a>
+                          ))}
+                        </div>
+                      </div>
+                    )}
+
+                    {/* Activity Stats */}
                     <div className="pt-4 border-t border-border">
-                      <h4 className="font-medium text-foreground mb-2">Quick Stats</h4>
+                      <h4 className="font-medium text-foreground mb-3">Community Activity</h4>
                       <div className="grid grid-cols-3 gap-4 text-center">
                         <div className="bg-surface rounded-lg p-4">
                           <p className="text-2xl font-bold text-foreground">{stats?.articleCount || 0}</p>
