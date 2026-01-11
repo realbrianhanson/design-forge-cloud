@@ -3,6 +3,7 @@ import { Toaster as Sonner } from "@/components/ui/sonner";
 import { TooltipProvider } from "@/components/ui/tooltip";
 import { QueryClient, QueryClientProvider } from "@tanstack/react-query";
 import { BrowserRouter, Routes, Route } from "react-router-dom";
+import { HelmetProvider } from "react-helmet-async";
 import { AuthProvider } from "@/hooks/useAuth";
 import { SearchModalProvider } from "@/hooks/useSearchModal";
 import { SearchModal } from "@/components/search/SearchModal";
@@ -43,60 +44,62 @@ function SearchModalWrapper() {
 }
 
 const App = () => (
-  <QueryClientProvider client={queryClient}>
-    <AuthProvider>
-      <SearchModalProvider>
-        <TooltipProvider>
-          <Toaster />
-          <Sonner />
-          <SearchModalWrapper />
-          <BrowserRouter>
-            <Routes>
-              <Route path="/" element={<Index />} />
-              <Route path="/news" element={<News />} />
-              <Route path="/news/:slug" element={<ArticleDetail />} />
-              <Route path="/article/:slug" element={<ArticleDetail />} />
-              <Route path="/events" element={<Events />} />
-              <Route path="/events/submit" element={<EventSubmit />} />
-              <Route path="/events/:slug" element={<EventDetail />} />
-              <Route path="/event/:slug" element={<EventDetail />} />
-              <Route path="/businesses" element={<Businesses />} />
-              <Route path="/businesses/add" element={<AddBusiness />} />
-              <Route path="/businesses/:slug" element={<BusinessDetail />} />
-              <Route path="/business/:slug" element={<BusinessDetail />} />
-              <Route path="/search" element={<Search />} />
-              <Route path="/auth/signin" element={<SignIn />} />
-              <Route path="/auth/signup" element={<SignUp />} />
-              <Route path="/auth/forgot-password" element={<ForgotPassword />} />
-              {/* Settings Routes */}
-              <Route path="/settings" element={<ProfileSettings />} />
-              <Route path="/settings/profile" element={<ProfileSettings />} />
-              <Route path="/settings/neighborhoods" element={<NeighborhoodSettings />} />
-              <Route path="/settings/notifications" element={<NotificationSettings />} />
-              <Route path="/settings/account" element={<AccountSettings />} />
-              <Route path="/profile" element={<ProfileSettings />} />
-              {/* Admin Routes */}
-              <Route path="/admin" element={<AdminDashboard />} />
-              <Route path="/admin/articles" element={<AdminArticles />} />
-              <Route path="/admin/events" element={<AdminEvents />} />
-              <Route path="/admin/businesses" element={<AdminBusinesses />} />
-              <Route path="/admin/ai" element={<AdminAI />} />
-              <Route path="/admin/newsletter" element={<AdminNewsletter />} />
-              {/* Newsletter Routes */}
-              <Route path="/newsletter" element={<NewsletterPage />} />
-              <Route path="/newsletter/verify" element={<NewsletterVerify />} />
-              <Route path="/newsletter/unsubscribe" element={<NewsletterUnsubscribe />} />
-              {/* Legacy routes - redirect to new auth paths */}
-              <Route path="/signin" element={<SignIn />} />
-              <Route path="/signup" element={<SignUp />} />
-              {/* ADD ALL CUSTOM ROUTES ABOVE THE CATCH-ALL "*" ROUTE */}
-              <Route path="*" element={<NotFound />} />
-            </Routes>
-          </BrowserRouter>
-        </TooltipProvider>
-      </SearchModalProvider>
-    </AuthProvider>
-  </QueryClientProvider>
+  <HelmetProvider>
+    <QueryClientProvider client={queryClient}>
+      <AuthProvider>
+        <SearchModalProvider>
+          <TooltipProvider>
+            <Toaster />
+            <Sonner />
+            <SearchModalWrapper />
+            <BrowserRouter>
+              <Routes>
+                <Route path="/" element={<Index />} />
+                <Route path="/news" element={<News />} />
+                <Route path="/news/:slug" element={<ArticleDetail />} />
+                <Route path="/article/:slug" element={<ArticleDetail />} />
+                <Route path="/events" element={<Events />} />
+                <Route path="/events/submit" element={<EventSubmit />} />
+                <Route path="/events/:slug" element={<EventDetail />} />
+                <Route path="/event/:slug" element={<EventDetail />} />
+                <Route path="/businesses" element={<Businesses />} />
+                <Route path="/businesses/add" element={<AddBusiness />} />
+                <Route path="/businesses/:slug" element={<BusinessDetail />} />
+                <Route path="/business/:slug" element={<BusinessDetail />} />
+                <Route path="/search" element={<Search />} />
+                <Route path="/auth/signin" element={<SignIn />} />
+                <Route path="/auth/signup" element={<SignUp />} />
+                <Route path="/auth/forgot-password" element={<ForgotPassword />} />
+                {/* Settings Routes */}
+                <Route path="/settings" element={<ProfileSettings />} />
+                <Route path="/settings/profile" element={<ProfileSettings />} />
+                <Route path="/settings/neighborhoods" element={<NeighborhoodSettings />} />
+                <Route path="/settings/notifications" element={<NotificationSettings />} />
+                <Route path="/settings/account" element={<AccountSettings />} />
+                <Route path="/profile" element={<ProfileSettings />} />
+                {/* Admin Routes */}
+                <Route path="/admin" element={<AdminDashboard />} />
+                <Route path="/admin/articles" element={<AdminArticles />} />
+                <Route path="/admin/events" element={<AdminEvents />} />
+                <Route path="/admin/businesses" element={<AdminBusinesses />} />
+                <Route path="/admin/ai" element={<AdminAI />} />
+                <Route path="/admin/newsletter" element={<AdminNewsletter />} />
+                {/* Newsletter Routes */}
+                <Route path="/newsletter" element={<NewsletterPage />} />
+                <Route path="/newsletter/verify" element={<NewsletterVerify />} />
+                <Route path="/newsletter/unsubscribe" element={<NewsletterUnsubscribe />} />
+                {/* Legacy routes - redirect to new auth paths */}
+                <Route path="/signin" element={<SignIn />} />
+                <Route path="/signup" element={<SignUp />} />
+                {/* ADD ALL CUSTOM ROUTES ABOVE THE CATCH-ALL "*" ROUTE */}
+                <Route path="*" element={<NotFound />} />
+              </Routes>
+            </BrowserRouter>
+          </TooltipProvider>
+        </SearchModalProvider>
+      </AuthProvider>
+    </QueryClientProvider>
+  </HelmetProvider>
 );
 
 export default App;

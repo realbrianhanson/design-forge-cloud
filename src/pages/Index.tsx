@@ -1,4 +1,5 @@
 import { Layout } from '@/components/layout/Layout';
+import { SEO, generateWebsiteSchema } from '@/components/SEO';
 import { BreakingNewsBanner } from '@/components/home/BreakingNewsBanner';
 import { HeroSection } from '@/components/home/HeroSection';
 import { SectionHeader } from '@/components/home/SectionHeader';
@@ -21,6 +22,11 @@ const Index = () => {
 
   return (
     <Layout>
+      <SEO 
+        url="/"
+        type="website"
+        structuredData={generateWebsiteSchema()}
+      />
       {/* Breaking News Banner */}
       <BreakingNewsBanner article={breakingNews || null} />
 

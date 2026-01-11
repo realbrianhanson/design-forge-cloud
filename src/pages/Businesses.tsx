@@ -2,6 +2,7 @@ import { useState, useMemo } from 'react';
 import { useSearchParams, Link } from 'react-router-dom';
 import { Search, Plus, Building2 } from 'lucide-react';
 import { Layout } from '@/components/layout/Layout';
+import { SEO } from '@/components/SEO';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { BusinessCard, BusinessCardSkeleton } from '@/components/directory/BusinessCard';
@@ -90,8 +91,31 @@ const Businesses = () => {
     return text;
   };
 
+  const getSeoTitle = () => {
+    if (filters.category) {
+      const categoryName = categories.find(c => c.slug === filters.category)?.name;
+      return categoryName ? `${categoryName} in Jacksonville` : 'Jacksonville Business Directory';
+    }
+    return 'Jacksonville Business Directory';
+  };
+
+  const getSeoDescription = () => {
+    if (filters.category) {
+      const categoryName = categories.find(c => c.slug === filters.category)?.name;
+      return categoryName 
+        ? `Find the best ${categoryName.toLowerCase()} businesses in Jacksonville, FL. Browse reviews, hours, and contact info.`
+        : 'Discover local businesses in Jacksonville, FL. Browse restaurants, shops, services, and more.';
+    }
+    return 'Discover local businesses in Jacksonville, FL. Browse restaurants, shops, services, and more. Support local businesses in the 904.';
+  };
+
   return (
     <Layout>
+      <SEO 
+        title={getSeoTitle()}
+        description={getSeoDescription()}
+        url={filters.category ? `/businesses?category=${filters.category}` : '/businesses'}
+      />
       <div className="bg-surface min-h-screen">
         <div className="container-news py-8 md:py-12">
           {/* Page Header */}

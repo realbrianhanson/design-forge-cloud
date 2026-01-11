@@ -3,6 +3,7 @@ import { Link, useSearchParams } from 'react-router-dom';
 import { Plus, Loader2, X, Calendar, ChevronDown } from 'lucide-react';
 import { format, isToday, isTomorrow, parseISO } from 'date-fns';
 import { Layout } from '@/components/layout/Layout';
+import { SEO } from '@/components/SEO';
 import { EventCard, EventCardSkeleton } from '@/components/events/EventCard';
 import { Button } from '@/components/ui/button';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
@@ -126,6 +127,11 @@ const Events = () => {
 
   return (
     <Layout>
+      <SEO 
+        title="Jacksonville Events"
+        description="Discover concerts, festivals, sports, family events, and more happening in Jacksonville, FL. Find what to do in the 904."
+        url="/events"
+      />
       <div className="section-spacing">
         <div className="container-news">
           {/* Page Header */}

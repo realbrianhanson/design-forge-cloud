@@ -2,6 +2,7 @@ import { useState, useEffect } from 'react';
 import { useSearchParams, useNavigate } from 'react-router-dom';
 import { Search, Loader2, Mail, Cloud, Sun } from 'lucide-react';
 import { Layout } from '@/components/layout/Layout';
+import { SEO } from '@/components/SEO';
 import { ArticleCard, ArticleCardSkeleton } from '@/components/home/ArticleCard';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
@@ -52,8 +53,25 @@ const News = () => {
     }
   };
 
+  const getCategoryTitle = () => {
+    if (!activeCategory) return 'Latest News';
+    const cat = CATEGORIES.find(c => c.value === activeCategory);
+    return cat ? `${cat.label} News` : 'Latest News';
+  };
+
+  const getCategoryDescription = () => {
+    if (!activeCategory) return 'Stay informed with Jacksonville\'s top stories and breaking news.';
+    const cat = CATEGORIES.find(c => c.value === activeCategory);
+    return cat ? `Jacksonville ${cat.label.toLowerCase()} news and updates. Stay informed with the latest ${cat.label.toLowerCase()} stories.` : '';
+  };
+
   return (
     <Layout>
+      <SEO 
+        title={getCategoryTitle()}
+        description={getCategoryDescription()}
+        url={activeCategory ? `/news?category=${activeCategory}` : '/news'}
+      />
       <div className="section-spacing">
         <div className="container-news">
           <div className="flex flex-col lg:flex-row gap-8">

@@ -2,6 +2,7 @@ import { useState, useEffect } from 'react';
 import { useSearchParams, useNavigate, Link } from 'react-router-dom';
 import { Search as SearchIcon, FileText, Calendar, Building2, Loader2 } from 'lucide-react';
 import { Layout } from '@/components/layout/Layout';
+import { SEO } from '@/components/SEO';
 import { useSearch, SearchResult, SearchResultType } from '@/hooks/useSearch';
 import { format } from 'date-fns';
 import { cn } from '@/lib/utils';
@@ -168,6 +169,12 @@ export default function Search() {
 
   return (
     <Layout>
+      <SEO 
+        title={query ? `Search results for "${query}"` : 'Search'}
+        description={query ? `Find news, events, and businesses in Jacksonville matching "${query}".` : 'Search 904News for local news, events, and businesses in Jacksonville, FL.'}
+        url={query ? `/search?q=${encodeURIComponent(query)}` : '/search'}
+        noindex
+      />
       <div className="container-news py-8">
         {/* Search Header */}
         <div className="max-w-2xl mx-auto mb-8">

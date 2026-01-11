@@ -7,6 +7,7 @@ import {
 } from 'lucide-react';
 import { format } from 'date-fns';
 import { Layout } from '@/components/layout/Layout';
+import { SEO, generateEventSchema } from '@/components/SEO';
 import { EventCard, EventCardSkeleton } from '@/components/events/EventCard';
 import { Button } from '@/components/ui/button';
 import { Skeleton } from '@/components/ui/skeleton';
@@ -153,6 +154,11 @@ const EventDetail = () => {
   if (error || !event) {
     return (
       <Layout>
+        <SEO 
+          title="Event Not Found"
+          description="This event doesn't exist or is no longer available."
+          noindex
+        />
         <div className="section-spacing">
           <div className="max-w-3xl mx-auto px-4 text-center">
             <h1 className="text-4xl font-bold text-primary mb-4">Event Not Found</h1>
@@ -171,6 +177,7 @@ const EventDetail = () => {
   const categoryStyles = getCategoryStyles(event.category);
   const startDate = new Date(event.start_time);
   const endDate = event.end_time ? new Date(event.end_time) : null;
+  const eventUrl = `/events/${event.slug || event.id}`;
   
   const getPriceDisplay = () => {
     if (event.price_type === 'free') return 'Free';
@@ -182,6 +189,26 @@ const EventDetail = () => {
 
   return (
     <Layout>
+      <SEO 
+        title={`${event.title} - ${format(startDate, 'MMM d, yyyy')}`}
+        description={event.short_description || event.description?.substring(0, 155) || `Join us for ${event.title} in Jacksonville, FL`}
+        image={event.image_url || undefined}
+        url={eventUrl}
+        type="event"
+        structuredData={generateEventSchema({
+          title: event.title,
+          description: event.short_description || event.description || '',
+          image: event.image_url || undefined,
+          startTime: event.start_time,
+          endTime: event.end_time || undefined,
+          locationName: event.location_name || undefined,
+          locationAddress: event.location_address || undefined,
+          priceMin: event.price_min || undefined,
+          priceMax: event.price_max || undefined,
+          priceType: event.price_type || undefined,
+          url: eventUrl,
+        })}
+      />
       {/* Hero Section */}
       <div className="relative h-64 md:h-80">
         {event.image_url ? (
