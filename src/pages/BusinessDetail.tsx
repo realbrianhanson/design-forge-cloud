@@ -6,6 +6,7 @@ import {
   ExternalLink, ImageOff, Building2
 } from 'lucide-react';
 import { Layout } from '@/components/layout/Layout';
+import { SEO, generateLocalBusinessSchema } from '@/components/SEO';
 import { Button } from '@/components/ui/button';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
 import { Skeleton } from '@/components/ui/skeleton';
@@ -83,6 +84,11 @@ const BusinessDetail = () => {
   if (error || !business) {
     return (
       <Layout>
+        <SEO 
+          title="Business Not Found"
+          description="This business doesn't exist or may have been removed."
+          noindex
+        />
         <div className="min-h-screen bg-surface flex items-center justify-center">
           <div className="text-center">
             <Building2 className="w-16 h-16 mx-auto text-muted-foreground/50 mb-4" />
@@ -158,8 +164,33 @@ const BusinessDetail = () => {
     return `https://www.google.com/maps/search/?api=1&query=${query}`;
   };
 
+  const businessUrl = `/businesses/${business.slug || business.id}`;
+
   return (
     <Layout>
+      <SEO 
+        title={`${business.name} - ${business.category.replace(/-/g, ' ')} in Jacksonville`}
+        description={business.short_description || business.description?.substring(0, 155) || `${business.name} is a ${business.category} business in Jacksonville, FL`}
+        image={business.cover_image_url || business.logo_url || undefined}
+        url={businessUrl}
+        type="place"
+        structuredData={generateLocalBusinessSchema({
+          name: business.name,
+          description: business.short_description || business.description || undefined,
+          image: business.cover_image_url || business.logo_url || undefined,
+          category: business.category,
+          address: business.address || undefined,
+          city: business.city || undefined,
+          state: business.state || undefined,
+          zipCode: business.zip_code || undefined,
+          phone: business.phone || undefined,
+          website: business.website || undefined,
+          rating: business.rating ? Number(business.rating) : undefined,
+          reviewCount: business.review_count || undefined,
+          priceLevel: business.price_level || undefined,
+          url: businessUrl,
+        })}
+      />
       <div className="min-h-screen bg-surface">
         {/* Cover Image */}
         {business.cover_image_url ? (

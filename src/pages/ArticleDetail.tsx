@@ -2,6 +2,7 @@ import { useEffect, useRef } from 'react';
 import { useParams, Link } from 'react-router-dom';
 import { ExternalLink, ArrowRight } from 'lucide-react';
 import { Layout } from '@/components/layout/Layout';
+import { SEO, generateArticleSchema } from '@/components/SEO';
 import { Breadcrumb } from '@/components/ui/breadcrumb-nav';
 import { ArticleCard, ArticleCardSkeleton } from '@/components/home/ArticleCard';
 import { EngagementBar } from '@/components/article/EngagementBar';
@@ -49,6 +50,11 @@ const ArticleDetail = () => {
   if (error || !article) {
     return (
       <Layout>
+        <SEO 
+          title="Article Not Found"
+          description="The article you're looking for doesn't exist or has been removed."
+          noindex
+        />
         <div className="section-spacing">
           <div className="max-w-3xl mx-auto px-4 text-center">
             <h1 className="text-4xl font-bold text-primary mb-4">Article Not Found</h1>
@@ -68,9 +74,33 @@ const ArticleDetail = () => {
   const isAggregated = article.content_type === 'aggregated';
   // Placeholder for auth - would normally come from auth context
   const isLoggedIn = false;
+  const articleUrl = `/news/${article.slug || article.id}`;
+  const articleDescription = article.excerpt || article.ai_summary || '';
 
   return (
     <Layout>
+      <SEO 
+        title={article.title}
+        description={articleDescription}
+        image={article.image_url || undefined}
+        url={articleUrl}
+        type="article"
+        article={{
+          publishedTime: article.published_at || article.created_at || undefined,
+          modifiedTime: article.updated_at || undefined,
+          author: article.source_name,
+          section: formatCategoryDisplay(article.category),
+        }}
+        structuredData={generateArticleSchema({
+          title: article.title,
+          description: articleDescription,
+          image: article.image_url || undefined,
+          publishedAt: article.published_at || article.created_at || undefined,
+          updatedAt: article.updated_at || undefined,
+          author: article.source_name,
+          url: articleUrl,
+        })}
+      />
       <article className="section-spacing">
         <div className="max-w-3xl mx-auto px-4">
           {/* Breadcrumb */}

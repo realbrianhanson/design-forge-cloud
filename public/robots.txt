@@ -1,8 +1,17 @@
+# 904News Robots.txt
+# https://904news.com
+
 User-agent: Googlebot
 Allow: /
+Disallow: /admin
+Disallow: /settings
+Disallow: /auth
 
 User-agent: Bingbot
 Allow: /
+Disallow: /admin
+Disallow: /settings
+Disallow: /auth
 
 User-agent: Twitterbot
 Allow: /
@@ -12,3 +21,15 @@ Allow: /
 
 User-agent: *
 Allow: /
+Disallow: /admin
+Disallow: /admin/*
+Disallow: /settings
+Disallow: /settings/*
+Disallow: /auth
+Disallow: /auth/*
+
+# Crawl-delay for polite bots
+Crawl-delay: 1
+
+# Sitemap
+Sitemap: https://904news.com/sitemap.xml
