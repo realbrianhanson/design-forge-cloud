@@ -228,6 +228,56 @@ export type Database = {
           },
         ]
       }
+      comments: {
+        Row: {
+          author_id: string
+          body: string
+          content_id: string
+          content_type: string
+          created_at: string | null
+          downvotes: number | null
+          id: string
+          parent_id: string | null
+          status: string | null
+          updated_at: string | null
+          upvotes: number | null
+        }
+        Insert: {
+          author_id: string
+          body: string
+          content_id: string
+          content_type: string
+          created_at?: string | null
+          downvotes?: number | null
+          id?: string
+          parent_id?: string | null
+          status?: string | null
+          updated_at?: string | null
+          upvotes?: number | null
+        }
+        Update: {
+          author_id?: string
+          body?: string
+          content_id?: string
+          content_type?: string
+          created_at?: string | null
+          downvotes?: number | null
+          id?: string
+          parent_id?: string | null
+          status?: string | null
+          updated_at?: string | null
+          upvotes?: number | null
+        }
+        Relationships: [
+          {
+            foreignKeyName: "comments_parent_id_fkey"
+            columns: ["parent_id"]
+            isOneToOne: false
+            referencedRelation: "comments"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       events: {
         Row: {
           category: string
@@ -353,15 +403,191 @@ export type Database = {
         }
         Relationships: []
       }
+      newsletter_subscribers: {
+        Row: {
+          breaking_news: boolean | null
+          created_at: string | null
+          daily_digest: boolean | null
+          email: string
+          id: string
+          status: string | null
+          unsubscribed_at: string | null
+          user_id: string | null
+          verification_token: string | null
+          verified_at: string | null
+          weekly_newsletter: boolean | null
+        }
+        Insert: {
+          breaking_news?: boolean | null
+          created_at?: string | null
+          daily_digest?: boolean | null
+          email: string
+          id?: string
+          status?: string | null
+          unsubscribed_at?: string | null
+          user_id?: string | null
+          verification_token?: string | null
+          verified_at?: string | null
+          weekly_newsletter?: boolean | null
+        }
+        Update: {
+          breaking_news?: boolean | null
+          created_at?: string | null
+          daily_digest?: boolean | null
+          email?: string
+          id?: string
+          status?: string | null
+          unsubscribed_at?: string | null
+          user_id?: string | null
+          verification_token?: string | null
+          verified_at?: string | null
+          weekly_newsletter?: boolean | null
+        }
+        Relationships: []
+      }
+      user_profiles: {
+        Row: {
+          avatar_url: string | null
+          bio: string | null
+          created_at: string | null
+          display_name: string | null
+          email_breaking_news: boolean | null
+          email_daily_digest: boolean | null
+          email_weekly_newsletter: boolean | null
+          id: string
+          is_verified: boolean | null
+          primary_neighborhood_id: string | null
+          reputation_score: number | null
+          updated_at: string | null
+          username: string | null
+        }
+        Insert: {
+          avatar_url?: string | null
+          bio?: string | null
+          created_at?: string | null
+          display_name?: string | null
+          email_breaking_news?: boolean | null
+          email_daily_digest?: boolean | null
+          email_weekly_newsletter?: boolean | null
+          id: string
+          is_verified?: boolean | null
+          primary_neighborhood_id?: string | null
+          reputation_score?: number | null
+          updated_at?: string | null
+          username?: string | null
+        }
+        Update: {
+          avatar_url?: string | null
+          bio?: string | null
+          created_at?: string | null
+          display_name?: string | null
+          email_breaking_news?: boolean | null
+          email_daily_digest?: boolean | null
+          email_weekly_newsletter?: boolean | null
+          id?: string
+          is_verified?: boolean | null
+          primary_neighborhood_id?: string | null
+          reputation_score?: number | null
+          updated_at?: string | null
+          username?: string | null
+        }
+        Relationships: [
+          {
+            foreignKeyName: "user_profiles_primary_neighborhood_id_fkey"
+            columns: ["primary_neighborhood_id"]
+            isOneToOne: false
+            referencedRelation: "neighborhoods"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      user_roles: {
+        Row: {
+          created_at: string | null
+          id: string
+          role: Database["public"]["Enums"]["app_role"]
+          user_id: string
+        }
+        Insert: {
+          created_at?: string | null
+          id?: string
+          role: Database["public"]["Enums"]["app_role"]
+          user_id: string
+        }
+        Update: {
+          created_at?: string | null
+          id?: string
+          role?: Database["public"]["Enums"]["app_role"]
+          user_id?: string
+        }
+        Relationships: []
+      }
+      user_saved_items: {
+        Row: {
+          created_at: string | null
+          id: string
+          item_id: string
+          item_type: string
+          user_id: string
+        }
+        Insert: {
+          created_at?: string | null
+          id?: string
+          item_id: string
+          item_type: string
+          user_id: string
+        }
+        Update: {
+          created_at?: string | null
+          id?: string
+          item_id?: string
+          item_type?: string
+          user_id?: string
+        }
+        Relationships: []
+      }
+      votes: {
+        Row: {
+          created_at: string | null
+          id: string
+          user_id: string
+          vote_type: number
+          voteable_id: string
+          voteable_type: string
+        }
+        Insert: {
+          created_at?: string | null
+          id?: string
+          user_id: string
+          vote_type: number
+          voteable_id: string
+          voteable_type: string
+        }
+        Update: {
+          created_at?: string | null
+          id?: string
+          user_id?: string
+          vote_type?: number
+          voteable_id?: string
+          voteable_type?: string
+        }
+        Relationships: []
+      }
     }
     Views: {
       [_ in never]: never
     }
     Functions: {
-      [_ in never]: never
+      has_role: {
+        Args: {
+          _role: Database["public"]["Enums"]["app_role"]
+          _user_id: string
+        }
+        Returns: boolean
+      }
     }
     Enums: {
-      [_ in never]: never
+      app_role: "admin" | "moderator" | "user"
     }
     CompositeTypes: {
       [_ in never]: never
@@ -488,6 +714,8 @@ export type CompositeTypes<
 
 export const Constants = {
   public: {
-    Enums: {},
+    Enums: {
+      app_role: ["admin", "moderator", "user"],
+    },
   },
 } as const
