@@ -158,3 +158,33 @@ export const useEvent = (slugOrId: string) => {
     enabled: !!slugOrId,
   });
 };
+
+// Fetch similar events (same category or neighborhood, excluding current)
+export const useSimilarEvents = (
+  category: string, 
+  excludeId: string, 
+  neighborhoodId: string,
+  limit: number = 4
+) => {
+  return useQuery({
+    queryKey: ['similar-events', category, excludeId, neighborhoodId, limit],
+    queryFn: async () => {
+      const now = new Date().toISOString();
+
+      const { data, error } = await supabase
+        .from('events')
+        .select('*')
+        .eq('status', 'approved')
+        .eq('category', category)
+        .neq('id', excludeId)
+        .gte('start_time', now)
+        .order('start_time', { ascending: true })
+        .limit(limit);
+
+      if (error) throw error;
+      return data as Tables<'events'>[];
+    },
+    enabled: !!category && !!excludeId,
+    staleTime: 1000 * 60 * 10,
+  });
+};
