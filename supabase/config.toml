@@ -5,3 +5,6 @@ verify_jwt = false
 
 [functions.send-newsletter-email]
 verify_jwt = false
+
+[functions.fetch-rss]
+verify_jwt = false
