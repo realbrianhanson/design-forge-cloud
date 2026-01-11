@@ -1,6 +1,6 @@
 import { useState, useEffect } from 'react';
 import { Link, useLocation } from 'react-router-dom';
-import { Search, Menu, X, User, LogOut } from 'lucide-react';
+import { Search, Menu, User, LogOut } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { useAuth } from '@/hooks/useAuth';
 import { useSearchModal } from '@/hooks/useSearchModal';
@@ -32,9 +32,12 @@ const categoryLinks = [
   { label: 'Traffic', href: '/category/traffic' },
 ];
 
-export function Header() {
+interface HeaderProps {
+  onMenuClick?: () => void;
+}
+
+export function Header({ onMenuClick }: HeaderProps) {
   const [isScrolled, setIsScrolled] = useState(false);
-  const [isMobileMenuOpen, setIsMobileMenuOpen] = useState(false);
   const location = useLocation();
   const { user, profile, signOut } = useAuth();
   const { openSearch } = useSearchModal();
@@ -48,10 +51,6 @@ export function Header() {
     return () => window.removeEventListener('scroll', handleScroll);
   }, []);
 
-  useEffect(() => {
-    setIsMobileMenuOpen(false);
-  }, [location.pathname]);
-
   const getInitials = () => {
     if (profile?.display_name) {
       return profile.display_name.split(' ').map(n => n[0]).join('').toUpperCase().slice(0, 2);
@@ -62,22 +61,18 @@ export function Header() {
     return 'U';
   };
 
-  useEffect(() => {
-    setIsMobileMenuOpen(false);
-  }, [location.pathname]);
-
   return (
-    <header className={`sticky top-0 z-50 bg-background transition-shadow duration-200 ${isScrolled ? 'shadow-header' : ''}`}>
+    <header className={`sticky top-0 z-40 bg-background transition-shadow duration-200 ${isScrolled ? 'shadow-md' : ''}`}>
       {/* Main Header */}
       <div className="border-b border-border/50">
         <div className="container-news">
-          <div className="flex items-center justify-between h-16 md:h-[72px]">
+          <div className="flex items-center justify-between h-14 md:h-[72px]">
             {/* Logo */}
             <Link to="/" className="flex items-baseline gap-0.5 group">
-              <span className="text-2xl md:text-[28px] font-bold text-accent transition-colors duration-200">
+              <span className="text-xl md:text-[28px] font-bold text-accent transition-colors duration-200">
                 904
               </span>
-              <span className="text-2xl md:text-[28px] font-bold text-primary transition-colors duration-200">
+              <span className="text-xl md:text-[28px] font-bold text-primary transition-colors duration-200">
                 NEWS
               </span>
             </Link>
@@ -100,22 +95,22 @@ export function Header() {
             </nav>
 
             {/* Right Side Actions */}
-            <div className="flex items-center gap-2 md:gap-4">
+            <div className="flex items-center gap-1 md:gap-4">
               <button
                 onClick={openSearch}
-                className="p-2 text-muted-foreground hover:text-accent transition-colors duration-200 flex items-center gap-2"
+                className="p-2.5 min-h-[44px] min-w-[44px] flex items-center justify-center text-muted-foreground hover:text-accent transition-colors duration-200"
                 aria-label="Search (⌘K)"
               >
                 <Search className="w-5 h-5" />
-                <span className="hidden lg:flex items-center gap-1 text-xs text-muted-foreground border border-border rounded px-1.5 py-0.5">
-                  ⌘K
-                </span>
               </button>
+              <span className="hidden lg:flex items-center gap-1 text-xs text-muted-foreground border border-border rounded px-1.5 py-0.5">
+                ⌘K
+              </span>
 
               {user ? (
                 <DropdownMenu>
                   <DropdownMenuTrigger asChild>
-                    <button className="flex items-center gap-2 hover:opacity-80 transition-opacity">
+                    <button className="hidden md:flex items-center gap-2 hover:opacity-80 transition-opacity">
                       <Avatar className="w-8 h-8">
                         <AvatarImage src={profile?.avatar_url || undefined} />
                         <AvatarFallback className="bg-accent text-accent-foreground text-sm">
@@ -124,7 +119,7 @@ export function Header() {
                       </Avatar>
                     </button>
                   </DropdownMenuTrigger>
-                  <DropdownMenuContent align="end" className="w-48">
+                  <DropdownMenuContent align="end" className="w-48 bg-background">
                     <div className="px-2 py-1.5">
                       <p className="text-sm font-medium truncate">
                         {profile?.display_name || 'User'}
@@ -151,43 +146,40 @@ export function Header() {
                 <>
                   <Link
                     to="/auth/signin"
-                    className="hidden sm:block text-sm font-medium text-muted-foreground hover:text-accent transition-colors duration-200"
+                    className="hidden md:block text-sm font-medium text-muted-foreground hover:text-accent transition-colors duration-200"
                   >
                     Sign In
                   </Link>
 
-                  <Link to="/auth/signup">
+                  <Link to="/auth/signup" className="hidden md:block">
                     <Button
                       variant="default"
                       size="sm"
-                      className="hidden sm:inline-flex bg-accent hover:bg-accent/90 text-accent-foreground font-medium px-5"
+                      className="bg-accent hover:bg-accent/90 text-accent-foreground font-medium px-5"
                     >
                       Sign Up
                     </Button>
                   </Link>
                 </>
               )}
+
               {/* Mobile Menu Button */}
               <button
-                className="md:hidden p-2 text-muted-foreground hover:text-accent transition-colors duration-200"
-                onClick={() => setIsMobileMenuOpen(!isMobileMenuOpen)}
-                aria-label={isMobileMenuOpen ? 'Close menu' : 'Open menu'}
+                className="md:hidden p-2.5 min-h-[44px] min-w-[44px] flex items-center justify-center text-muted-foreground hover:text-accent transition-colors duration-200"
+                onClick={onMenuClick}
+                aria-label="Open menu"
               >
-                {isMobileMenuOpen ? (
-                  <X className="w-6 h-6" />
-                ) : (
-                  <Menu className="w-6 h-6" />
-                )}
+                <Menu className="w-6 h-6" />
               </button>
             </div>
           </div>
         </div>
       </div>
 
-      {/* Category Navigation Bar */}
-      <div className="bg-surface border-b border-border/30">
+      {/* Category Navigation Bar - Hidden on mobile */}
+      <div className="hidden md:block bg-surface border-b border-border/30">
         <div className="container-news">
-          <nav className="flex items-center gap-1 overflow-x-auto scrollbar-hide py-3 -mx-4 px-4 sm:mx-0 sm:px-0">
+          <nav className="flex items-center gap-1 overflow-x-auto scrollbar-hide py-3">
             {categoryLinks.map((link) => (
               <Link
                 key={link.href}
@@ -204,67 +196,6 @@ export function Header() {
           </nav>
         </div>
       </div>
-
-      {/* Mobile Menu */}
-      {isMobileMenuOpen && (
-        <div className="md:hidden bg-background border-b border-border animate-fade-in">
-          <div className="container-news py-4">
-            <nav className="flex flex-col gap-1">
-              {mainNavLinks.map((link) => (
-                <Link
-                  key={link.href}
-                  to={link.href}
-                  className={`px-4 py-3 text-base font-medium rounded-md transition-colors duration-200 ${
-                    location.pathname === link.href
-                      ? 'text-accent bg-accent/5'
-                      : 'text-muted-foreground hover:text-accent hover:bg-accent/5'
-                  }`}
-                >
-                  {link.label}
-                </Link>
-              ))}
-              <hr className="my-2 border-border" />
-              {user ? (
-                <>
-                  <div className="px-4 py-2">
-                    <p className="text-sm font-medium">{profile?.display_name || 'User'}</p>
-                    <p className="text-xs text-muted-foreground">{user.email}</p>
-                  </div>
-                  <Link
-                    to="/profile"
-                    className="px-4 py-3 text-base font-medium text-muted-foreground hover:text-accent hover:bg-accent/5 rounded-md transition-colors duration-200"
-                  >
-                    Profile
-                  </Link>
-                  <button
-                    onClick={signOut}
-                    className="px-4 py-3 text-base font-medium text-destructive hover:bg-destructive/5 rounded-md transition-colors duration-200 text-left"
-                  >
-                    Sign Out
-                  </button>
-                </>
-              ) : (
-                <>
-                  <Link
-                    to="/auth/signin"
-                    className="px-4 py-3 text-base font-medium text-muted-foreground hover:text-accent hover:bg-accent/5 rounded-md transition-colors duration-200"
-                  >
-                    Sign In
-                  </Link>
-                  <Link to="/auth/signup">
-                    <Button
-                      variant="default"
-                      className="mt-2 w-full bg-accent hover:bg-accent/90 text-accent-foreground font-medium"
-                    >
-                      Sign Up
-                    </Button>
-                  </Link>
-                </>
-              )}
-            </nav>
-          </div>
-        </div>
-      )}
     </header>
   );
 }

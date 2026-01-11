@@ -158,30 +158,38 @@ export const NewsletterSignupForm = ({
     );
   }
 
-  // Inline variant
+  // Inline variant - designed for dark backgrounds like primary
   if (variant === 'inline') {
     return (
-      <form onSubmit={handleSubmit} className="flex gap-2">
-        <Input
-          type="email"
-          placeholder="Enter your email"
-          value={email}
-          onChange={(e) => setEmail(e.target.value)}
-          className="flex-1 bg-white"
-          required
-        />
-        <Button 
-          type="submit" 
-          disabled={subscribeMutation.isPending}
-          className="bg-teal-600 hover:bg-teal-700"
-        >
-          {subscribeMutation.isPending ? (
-            <Loader2 className="w-4 h-4 animate-spin" />
-          ) : (
-            'Subscribe'
-          )}
-        </Button>
-      </form>
+      <div className="text-center">
+        <h2 className="text-xl sm:text-2xl font-semibold text-primary-foreground mb-2">
+          Stay Connected to Jacksonville
+        </h2>
+        <p className="text-primary-foreground/80 mb-6 text-sm sm:text-base">
+          Get the latest news, events, and local updates delivered to your inbox.
+        </p>
+        <form onSubmit={handleSubmit} className="flex flex-col sm:flex-row gap-3 max-w-md mx-auto">
+          <Input
+            type="email"
+            placeholder="Enter your email"
+            value={email}
+            onChange={(e) => setEmail(e.target.value)}
+            className="flex-1 bg-white text-foreground min-h-[48px]"
+            required
+          />
+          <Button 
+            type="submit" 
+            disabled={subscribeMutation.isPending}
+            className="bg-accent hover:bg-accent/90 text-accent-foreground min-h-[48px] px-6"
+          >
+            {subscribeMutation.isPending ? (
+              <Loader2 className="w-4 h-4 animate-spin" />
+            ) : (
+              'Subscribe'
+            )}
+          </Button>
+        </form>
+      </div>
     );
   }
 
