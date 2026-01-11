@@ -1,4 +1,4 @@
-import { useQuery } from '@tanstack/react-query';
+import { useQuery, useInfiniteQuery } from '@tanstack/react-query';
 import { supabase } from '@/integrations/supabase/client';
 import { Tables } from '@/integrations/supabase/types';
 
@@ -70,5 +70,93 @@ export const useLatestArticles = (excludeId?: string, limit: number = 6) => {
       return data as Tables<'articles'>[];
     },
     staleTime: 1000 * 60 * 5,
+  });
+};
+
+// Infinite scroll articles with optional category filter
+export const useInfiniteArticles = (category: string = '', pageSize: number = 10) => {
+  return useInfiniteQuery({
+    queryKey: ['infinite-articles', category, pageSize],
+    queryFn: async ({ pageParam = 0 }) => {
+      let query = supabase
+        .from('articles')
+        .select('*', { count: 'exact' })
+        .eq('status', 'active')
+        .order('published_at', { ascending: false })
+        .range(pageParam * pageSize, (pageParam + 1) * pageSize - 1);
+
+      if (category) {
+        query = query.eq('category', category);
+      }
+
+      const { data, error, count } = await query;
+
+      if (error) throw error;
+      
+      return {
+        articles: data as Tables<'articles'>[],
+        nextPage: data.length === pageSize ? pageParam + 1 : undefined,
+        totalCount: count || 0,
+      };
+    },
+    getNextPageParam: (lastPage) => lastPage.nextPage,
+    initialPageParam: 0,
+    staleTime: 1000 * 60 * 5,
+  });
+};
+
+// Fetch trending articles (by view_count in last 7 days)
+export const useTrendingArticles = (limit: number = 5) => {
+  return useQuery({
+    queryKey: ['trending-articles', limit],
+    queryFn: async () => {
+      const sevenDaysAgo = new Date();
+      sevenDaysAgo.setDate(sevenDaysAgo.getDate() - 7);
+
+      const { data, error } = await supabase
+        .from('articles')
+        .select('*')
+        .eq('status', 'active')
+        .gte('published_at', sevenDaysAgo.toISOString())
+        .order('view_count', { ascending: false })
+        .limit(limit);
+
+      if (error) throw error;
+      return data as Tables<'articles'>[];
+    },
+    staleTime: 1000 * 60 * 10, // 10 minutes
+  });
+};
+
+// Fetch single article by slug or id
+export const useArticle = (slugOrId: string) => {
+  return useQuery({
+    queryKey: ['article', slugOrId],
+    queryFn: async () => {
+      // First try by slug
+      let { data, error } = await supabase
+        .from('articles')
+        .select('*')
+        .eq('slug', slugOrId)
+        .eq('status', 'active')
+        .maybeSingle();
+
+      if (!data && !error) {
+        // Try by id
+        const result = await supabase
+          .from('articles')
+          .select('*')
+          .eq('id', slugOrId)
+          .eq('status', 'active')
+          .maybeSingle();
+        
+        data = result.data;
+        error = result.error;
+      }
+
+      if (error) throw error;
+      return data as Tables<'articles'> | null;
+    },
+    enabled: !!slugOrId,
   });
 };
