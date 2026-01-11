@@ -86,7 +86,8 @@ export const useInfiniteArticles = (category: string = '', pageSize: number = 10
         .range(pageParam * pageSize, (pageParam + 1) * pageSize - 1);
 
       if (category) {
-        query = query.eq('category', category);
+        // Case-insensitive category match
+        query = query.ilike('category', category);
       }
 
       const { data, error, count } = await query;
