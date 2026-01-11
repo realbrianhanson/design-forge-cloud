@@ -21,6 +21,9 @@ import NeighborhoodSettings from "./pages/settings/NeighborhoodSettings";
 import NotificationSettings from "./pages/settings/NotificationSettings";
 import AccountSettings from "./pages/settings/AccountSettings";
 import AdminDashboard from "./pages/admin/AdminDashboard";
+import AdminArticles from "./pages/admin/AdminArticles";
+import AdminEvents from "./pages/admin/AdminEvents";
+import AdminBusinesses from "./pages/admin/AdminBusinesses";
 import NotFound from "./pages/NotFound";
 
 const queryClient = new QueryClient();
@@ -54,6 +57,9 @@ const App = () => (
             <Route path="/profile" element={<ProfileSettings />} />
             {/* Admin Routes */}
             <Route path="/admin" element={<AdminDashboard />} />
+            <Route path="/admin/articles" element={<AdminArticles />} />
+            <Route path="/admin/events" element={<AdminEvents />} />
+            <Route path="/admin/businesses" element={<AdminBusinesses />} />
             {/* Legacy routes - redirect to new auth paths */}
             <Route path="/signin" element={<SignIn />} />
             <Route path="/signup" element={<SignUp />} />
