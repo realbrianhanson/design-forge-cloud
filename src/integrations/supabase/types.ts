@@ -202,11 +202,15 @@ export type Database = {
           created_at: string | null
           description: string | null
           email: string | null
+          external_id: string | null
           gallery_urls: string[] | null
           hours: Json | null
           id: string
           is_featured: boolean | null
+          last_synced_at: string | null
+          latitude: number | null
           logo_url: string | null
+          longitude: number | null
           name: string
           neighborhood_id: string | null
           phone: string | null
@@ -215,6 +219,7 @@ export type Database = {
           review_count: number | null
           short_description: string | null
           slug: string
+          source: string | null
           state: string | null
           status: string | null
           subcategories: string[] | null
@@ -234,11 +239,15 @@ export type Database = {
           created_at?: string | null
           description?: string | null
           email?: string | null
+          external_id?: string | null
           gallery_urls?: string[] | null
           hours?: Json | null
           id?: string
           is_featured?: boolean | null
+          last_synced_at?: string | null
+          latitude?: number | null
           logo_url?: string | null
+          longitude?: number | null
           name: string
           neighborhood_id?: string | null
           phone?: string | null
@@ -247,6 +256,7 @@ export type Database = {
           review_count?: number | null
           short_description?: string | null
           slug: string
+          source?: string | null
           state?: string | null
           status?: string | null
           subcategories?: string[] | null
@@ -266,11 +276,15 @@ export type Database = {
           created_at?: string | null
           description?: string | null
           email?: string | null
+          external_id?: string | null
           gallery_urls?: string[] | null
           hours?: Json | null
           id?: string
           is_featured?: boolean | null
+          last_synced_at?: string | null
+          latitude?: number | null
           logo_url?: string | null
+          longitude?: number | null
           name?: string
           neighborhood_id?: string | null
           phone?: string | null
@@ -279,6 +293,7 @@ export type Database = {
           review_count?: number | null
           short_description?: string | null
           slug?: string
+          source?: string | null
           state?: string | null
           status?: string | null
           subcategories?: string[] | null
