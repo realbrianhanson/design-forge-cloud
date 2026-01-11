@@ -206,16 +206,17 @@ const HorizontalCard = ({
     <Link 
       to={`/news/${article.slug || article.id}`}
       className={cn(
-        "group flex gap-5 p-4 bg-card rounded-xl shadow-card hover:shadow-card-hover transition-all duration-200",
+        "group flex flex-col sm:flex-row gap-4 sm:gap-5 p-4 bg-card rounded-xl shadow-card hover:shadow-card-hover transition-all duration-200",
         className
       )}
     >
       {showImage && (
-        <div className="w-48 h-32 shrink-0 overflow-hidden rounded-lg bg-surface">
+        <div className="w-full sm:w-40 md:w-48 h-40 sm:h-28 md:h-32 shrink-0 overflow-hidden rounded-lg bg-surface">
           {article.image_url ? (
             <img 
               src={article.image_url} 
               alt={article.title}
+              loading="lazy"
               className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-300"
             />
           ) : (
@@ -235,24 +236,24 @@ const HorizontalCard = ({
           {formatCategoryDisplay(article.category)}
         </span>
         
-        <h3 className="text-xl font-semibold text-card-foreground line-clamp-2 mt-1 group-hover:text-accent transition-colors">
+        <h3 className="text-lg sm:text-xl font-semibold text-card-foreground line-clamp-2 mt-1 group-hover:text-accent transition-colors">
           {article.title}
         </h3>
         
         {showExcerpt && article.excerpt && (
-          <p className="text-muted-foreground mt-2 line-clamp-2">
+          <p className="text-muted-foreground mt-2 line-clamp-2 text-sm sm:text-base">
             {article.excerpt}
           </p>
         )}
         
-        <div className="flex items-center gap-4 mt-3 text-sm text-muted-foreground">
-          <span>{article.source_name}</span>
+        <div className="flex items-center gap-3 sm:gap-4 mt-3 text-xs sm:text-sm text-muted-foreground">
+          <span className="truncate">{article.source_name}</span>
           <span>•</span>
           <span>{timeAgo}</span>
           {article.comment_count !== null && article.comment_count > 0 && (
             <>
-              <span>•</span>
-              <span className="flex items-center gap-1">
+              <span className="hidden sm:inline">•</span>
+              <span className="hidden sm:flex items-center gap-1">
                 <MessageCircle className="w-3.5 h-3.5" />
                 {article.comment_count}
               </span>

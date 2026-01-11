@@ -79,96 +79,157 @@ export const EngagementBar = ({
     window.open(`https://www.facebook.com/sharer/sharer.php?u=${url}`, '_blank');
   };
 
+  const handleNativeShare = async () => {
+    if (navigator.share) {
+      try {
+        await navigator.share({
+          title: document.title,
+          url: window.location.href,
+        });
+      } catch (err) {
+        // User cancelled
+      }
+    } else {
+      handleCopyLink();
+    }
+  };
+
   return (
-    <div className="flex items-center gap-3 flex-wrap mt-10 pt-6 border-t border-border">
-      {/* Upvote Button */}
-      <Tooltip>
-        <TooltipTrigger asChild>
-          <Button
-            variant="ghost"
-            size="sm"
+    <>
+      {/* Desktop Engagement Bar */}
+      <div className="hidden md:flex items-center gap-3 flex-wrap mt-10 pt-6 border-t border-border">
+        {/* Upvote Button */}
+        <Tooltip>
+          <TooltipTrigger asChild>
+            <Button
+              variant="ghost"
+              size="sm"
+              onClick={handleVote}
+              className={cn(
+                "flex items-center gap-2 transition-colors",
+                hasVoted 
+                  ? "text-accent bg-accent/10 hover:bg-accent/20" 
+                  : "text-muted-foreground hover:text-accent"
+              )}
+            >
+              <ThumbsUp className={cn("w-4 h-4", hasVoted && "fill-current")} />
+              <span>{localUpvotes}</span>
+            </Button>
+          </TooltipTrigger>
+          {!isLoggedIn && (
+            <TooltipContent>Sign in to vote</TooltipContent>
+          )}
+        </Tooltip>
+
+        {/* Comment Button */}
+        <Button
+          variant="ghost"
+          size="sm"
+          onClick={onCommentClick}
+          className="flex items-center gap-2 text-muted-foreground hover:text-accent"
+        >
+          <MessageCircle className="w-4 h-4" />
+          <span>{commentCount}</span>
+        </Button>
+
+        {/* Share Button */}
+        <DropdownMenu>
+          <DropdownMenuTrigger asChild>
+            <Button
+              variant="ghost"
+              size="sm"
+              className="flex items-center gap-2 text-muted-foreground hover:text-accent"
+            >
+              <Share2 className="w-4 h-4" />
+              <span>Share</span>
+            </Button>
+          </DropdownMenuTrigger>
+          <DropdownMenuContent align="start" className="bg-background">
+            <DropdownMenuItem onClick={handleCopyLink}>
+              {copied ? <Check className="w-4 h-4 mr-2" /> : <LinkIcon className="w-4 h-4 mr-2" />}
+              Copy link
+            </DropdownMenuItem>
+            <DropdownMenuItem onClick={handleShareTwitter}>
+              <svg className="w-4 h-4 mr-2" fill="currentColor" viewBox="0 0 24 24">
+                <path d="M18.244 2.25h3.308l-7.227 8.26 8.502 11.24H16.17l-5.214-6.817L4.99 21.75H1.68l7.73-8.835L1.254 2.25H8.08l4.713 6.231zm-1.161 17.52h1.833L7.084 4.126H5.117z" />
+              </svg>
+              Share on X
+            </DropdownMenuItem>
+            <DropdownMenuItem onClick={handleShareFacebook}>
+              <svg className="w-4 h-4 mr-2" fill="currentColor" viewBox="0 0 24 24">
+                <path d="M24 12.073c0-6.627-5.373-12-12-12s-12 5.373-12 12c0 5.99 4.388 10.954 10.125 11.854v-8.385H7.078v-3.47h3.047V9.43c0-3.007 1.792-4.669 4.533-4.669 1.312 0 2.686.235 2.686.235v2.953H15.83c-1.491 0-1.956.925-1.956 1.874v2.25h3.328l-.532 3.47h-2.796v8.385C19.612 23.027 24 18.062 24 12.073z" />
+              </svg>
+              Share on Facebook
+            </DropdownMenuItem>
+          </DropdownMenuContent>
+        </DropdownMenu>
+
+        {/* Save Button */}
+        <Tooltip>
+          <TooltipTrigger asChild>
+            <Button
+              variant="ghost"
+              size="sm"
+              onClick={handleSave}
+              className={cn(
+                "flex items-center gap-2 transition-colors ml-auto",
+                isSaved 
+                  ? "text-accent" 
+                  : "text-muted-foreground hover:text-accent"
+              )}
+            >
+              <Bookmark className={cn("w-4 h-4", isSaved && "fill-current")} />
+              <span>{isSaved ? 'Saved' : 'Save'}</span>
+            </Button>
+          </TooltipTrigger>
+          {!isLoggedIn && (
+            <TooltipContent>Sign in to save</TooltipContent>
+          )}
+        </Tooltip>
+      </div>
+
+      {/* Mobile Sticky Bottom Bar */}
+      <div className="md:hidden fixed bottom-16 left-0 right-0 z-30 bg-background border-t border-border px-4 py-3 safe-area-bottom">
+        <div className="flex items-center justify-around">
+          <button
             onClick={handleVote}
             className={cn(
-              "flex items-center gap-2 transition-colors",
-              hasVoted 
-                ? "text-accent bg-accent/10 hover:bg-accent/20" 
-                : "text-muted-foreground hover:text-accent"
+              "flex flex-col items-center gap-1 min-w-[60px] py-1",
+              hasVoted ? "text-accent" : "text-muted-foreground"
             )}
           >
-            <ThumbsUp className={cn("w-4 h-4", hasVoted && "fill-current")} />
-            <span>{localUpvotes}</span>
-          </Button>
-        </TooltipTrigger>
-        {!isLoggedIn && (
-          <TooltipContent>Sign in to vote</TooltipContent>
-        )}
-      </Tooltip>
-
-      {/* Comment Button */}
-      <Button
-        variant="ghost"
-        size="sm"
-        onClick={onCommentClick}
-        className="flex items-center gap-2 text-muted-foreground hover:text-accent"
-      >
-        <MessageCircle className="w-4 h-4" />
-        <span>{commentCount}</span>
-      </Button>
-
-      {/* Share Button */}
-      <DropdownMenu>
-        <DropdownMenuTrigger asChild>
-          <Button
-            variant="ghost"
-            size="sm"
-            className="flex items-center gap-2 text-muted-foreground hover:text-accent"
+            <ThumbsUp className={cn("w-5 h-5", hasVoted && "fill-current")} />
+            <span className="text-xs">{localUpvotes}</span>
+          </button>
+          
+          <button
+            onClick={onCommentClick}
+            className="flex flex-col items-center gap-1 min-w-[60px] py-1 text-muted-foreground"
           >
-            <Share2 className="w-4 h-4" />
-            <span>Share</span>
-          </Button>
-        </DropdownMenuTrigger>
-        <DropdownMenuContent align="start">
-          <DropdownMenuItem onClick={handleCopyLink}>
-            {copied ? <Check className="w-4 h-4 mr-2" /> : <LinkIcon className="w-4 h-4 mr-2" />}
-            Copy link
-          </DropdownMenuItem>
-          <DropdownMenuItem onClick={handleShareTwitter}>
-            <svg className="w-4 h-4 mr-2" fill="currentColor" viewBox="0 0 24 24">
-              <path d="M18.244 2.25h3.308l-7.227 8.26 8.502 11.24H16.17l-5.214-6.817L4.99 21.75H1.68l7.73-8.835L1.254 2.25H8.08l4.713 6.231zm-1.161 17.52h1.833L7.084 4.126H5.117z" />
-            </svg>
-            Share on X
-          </DropdownMenuItem>
-          <DropdownMenuItem onClick={handleShareFacebook}>
-            <svg className="w-4 h-4 mr-2" fill="currentColor" viewBox="0 0 24 24">
-              <path d="M24 12.073c0-6.627-5.373-12-12-12s-12 5.373-12 12c0 5.99 4.388 10.954 10.125 11.854v-8.385H7.078v-3.47h3.047V9.43c0-3.007 1.792-4.669 4.533-4.669 1.312 0 2.686.235 2.686.235v2.953H15.83c-1.491 0-1.956.925-1.956 1.874v2.25h3.328l-.532 3.47h-2.796v8.385C19.612 23.027 24 18.062 24 12.073z" />
-            </svg>
-            Share on Facebook
-          </DropdownMenuItem>
-        </DropdownMenuContent>
-      </DropdownMenu>
-
-      {/* Save Button */}
-      <Tooltip>
-        <TooltipTrigger asChild>
-          <Button
-            variant="ghost"
-            size="sm"
+            <MessageCircle className="w-5 h-5" />
+            <span className="text-xs">{commentCount}</span>
+          </button>
+          
+          <button
+            onClick={handleNativeShare}
+            className="flex flex-col items-center gap-1 min-w-[60px] py-1 text-muted-foreground"
+          >
+            <Share2 className="w-5 h-5" />
+            <span className="text-xs">Share</span>
+          </button>
+          
+          <button
             onClick={handleSave}
             className={cn(
-              "flex items-center gap-2 transition-colors ml-auto",
-              isSaved 
-                ? "text-accent" 
-                : "text-muted-foreground hover:text-accent"
+              "flex flex-col items-center gap-1 min-w-[60px] py-1",
+              isSaved ? "text-accent" : "text-muted-foreground"
             )}
           >
-            <Bookmark className={cn("w-4 h-4", isSaved && "fill-current")} />
-            <span>{isSaved ? 'Saved' : 'Save'}</span>
-          </Button>
-        </TooltipTrigger>
-        {!isLoggedIn && (
-          <TooltipContent>Sign in to save</TooltipContent>
-        )}
-      </Tooltip>
-    </div>
+            <Bookmark className={cn("w-5 h-5", isSaved && "fill-current")} />
+            <span className="text-xs">{isSaved ? 'Saved' : 'Save'}</span>
+          </button>
+        </div>
+      </div>
+    </>
   );
 };

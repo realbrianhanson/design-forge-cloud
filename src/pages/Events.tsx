@@ -129,15 +129,15 @@ const Events = () => {
       <div className="section-spacing">
         <div className="container-news">
           {/* Page Header */}
-          <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4 mb-8">
+          <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4 mb-6 md:mb-8">
             <div>
-              <h1 className="text-3xl font-bold text-primary">Jacksonville Events</h1>
-              <p className="text-muted-foreground mt-1">
+              <h1 className="text-2xl md:text-3xl font-bold text-primary">Jacksonville Events</h1>
+              <p className="text-muted-foreground mt-1 text-sm md:text-base">
                 Discover what's happening in the 904
               </p>
             </div>
             <Link to="/events/submit">
-              <Button variant="outline" className="shrink-0">
+              <Button variant="outline" className="shrink-0 min-h-[44px]">
                 <Plus className="w-4 h-4 mr-2" />
                 Submit an Event
               </Button>
@@ -151,9 +151,9 @@ const Events = () => {
                 <Calendar className="w-5 h-5 text-accent" />
                 Featured Events
               </h2>
-              <div className="flex gap-4 overflow-x-auto pb-2 scrollbar-hide -mx-4 px-4 sm:mx-0 sm:px-0">
+              <div className="flex gap-4 overflow-x-auto pb-2 scrollbar-hide -mx-4 px-4 sm:mx-0 sm:px-0 snap-x-mandatory">
                 {featuredEvents.map(event => (
-                  <div key={event.id} className="min-w-[300px] sm:min-w-[350px]">
+                  <div key={event.id} className="min-w-[280px] sm:min-w-[350px] snap-start">
                     <EventCard event={event} variant="horizontal" />
                   </div>
                 ))}
@@ -164,13 +164,13 @@ const Events = () => {
           {/* Filter Bar */}
           <div className="bg-card rounded-xl shadow-card p-4 mb-6">
             {/* Date Filter Pills */}
-            <div className="flex gap-2 overflow-x-auto pb-3 mb-3 border-b border-border scrollbar-hide">
+            <div className="flex gap-2 overflow-x-auto pb-3 mb-3 border-b border-border scrollbar-hide snap-x-mandatory -mx-4 px-4 sm:mx-0 sm:px-0">
               {DATE_FILTERS.map(filter => (
                 <button
                   key={filter.value}
                   onClick={() => updateFilter('date', filter.value === 'all' ? '' : filter.value)}
                   className={cn(
-                    "px-4 py-2 rounded-full text-sm font-medium whitespace-nowrap transition-colors",
+                    "px-4 py-2.5 min-h-[44px] rounded-full text-sm font-medium whitespace-nowrap transition-colors snap-start",
                     dateFilter === filter.value || (filter.value === 'all' && !dateFilter)
                       ? "bg-primary text-primary-foreground"
                       : "bg-muted text-muted-foreground hover:bg-muted/80 border border-border"
@@ -181,13 +181,13 @@ const Events = () => {
               ))}
             </div>
 
-            {/* Dropdown Filters */}
-            <div className="flex flex-wrap gap-3">
+            {/* Dropdown Filters - stacked on mobile */}
+            <div className="flex flex-col sm:flex-row gap-3">
               <Select value={category} onValueChange={(v) => updateFilter('category', v)}>
-                <SelectTrigger className="w-[180px]">
+                <SelectTrigger className="w-full sm:w-[180px] min-h-[44px]">
                   <SelectValue placeholder="All Categories" />
                 </SelectTrigger>
-                <SelectContent>
+                <SelectContent className="bg-background z-50">
                   {CATEGORIES.map(cat => (
                     <SelectItem key={cat.value} value={cat.value || 'all'}>
                       {cat.label}
@@ -197,10 +197,10 @@ const Events = () => {
               </Select>
 
               <Select value={neighborhoodId} onValueChange={(v) => updateFilter('neighborhood', v)}>
-                <SelectTrigger className="w-[180px]">
+                <SelectTrigger className="w-full sm:w-[180px] min-h-[44px]">
                   <SelectValue placeholder="All Neighborhoods" />
                 </SelectTrigger>
-                <SelectContent>
+                <SelectContent className="bg-background z-50">
                   <SelectItem value="all">All Neighborhoods</SelectItem>
                   {neighborhoods?.map(n => (
                     <SelectItem key={n.id} value={n.id}>
@@ -211,10 +211,10 @@ const Events = () => {
               </Select>
 
               <Select value={priceType} onValueChange={(v) => updateFilter('price', v)}>
-                <SelectTrigger className="w-[140px]">
+                <SelectTrigger className="w-full sm:w-[140px] min-h-[44px]">
                   <SelectValue placeholder="All Prices" />
                 </SelectTrigger>
-                <SelectContent>
+                <SelectContent className="bg-background z-50">
                   {PRICE_FILTERS.map(p => (
                     <SelectItem key={p.value} value={p.value || 'all'}>
                       {p.label}

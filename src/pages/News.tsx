@@ -60,22 +60,22 @@ const News = () => {
             {/* Main Column */}
             <main className="flex-1 lg:max-w-[65%]">
               {/* Page Header */}
-              <div className="mb-8">
-                <h1 className="text-3xl font-bold text-primary">Latest News</h1>
-                <p className="text-muted-foreground mt-1">
+              <div className="mb-6 md:mb-8">
+                <h1 className="text-2xl md:text-3xl font-bold text-primary">Latest News</h1>
+                <p className="text-muted-foreground mt-1 text-sm md:text-base">
                   Stay informed with Jacksonville's top stories
                 </p>
               </div>
 
               {/* Category Filter Bar */}
-              <div className="sticky top-0 z-10 bg-background border-b border-border py-3 -mx-4 px-4 sm:mx-0 sm:px-0 mb-6">
-                <div className="flex gap-2 overflow-x-auto scrollbar-hide pb-1">
+              <div className="sticky top-14 md:top-0 z-10 bg-background border-b border-border py-3 -mx-4 px-4 sm:mx-0 sm:px-0 mb-6">
+                <div className="flex gap-2 overflow-x-auto scrollbar-hide pb-1 snap-x-mandatory">
                   {CATEGORIES.map((category) => (
                     <button
                       key={category.value}
                       onClick={() => handleCategoryChange(category.value)}
                       className={cn(
-                        "px-4 py-2 rounded-full text-sm font-medium whitespace-nowrap transition-colors",
+                        "px-4 py-2.5 min-h-[44px] rounded-full text-sm font-medium whitespace-nowrap transition-colors snap-start",
                         activeCategory === category.value
                           ? "bg-primary text-primary-foreground"
                           : "bg-muted text-muted-foreground hover:bg-muted/80"
@@ -118,7 +118,7 @@ const News = () => {
                     variant="outline"
                     onClick={() => fetchNextPage()}
                     disabled={isFetchingNextPage}
-                    className="min-w-[200px]"
+                    className="min-w-[200px] min-h-[48px]"
                   >
                     {isFetchingNextPage ? (
                       <>

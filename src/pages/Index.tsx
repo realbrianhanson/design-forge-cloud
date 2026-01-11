@@ -5,6 +5,7 @@ import { SectionHeader } from '@/components/home/SectionHeader';
 import { ArticleCard, ArticleCardSkeleton } from '@/components/home/ArticleCard';
 import { EventCard, EventCardSkeleton } from '@/components/home/EventCard';
 import { BusinessCard, BusinessCardSkeleton } from '@/components/home/BusinessCard';
+import { NewsletterSignupForm } from '@/components/newsletter/NewsletterSignupForm';
 import { useBreakingNews, useFeaturedArticle, useLatestArticles } from '@/hooks/useArticles';
 import { useUpcomingEvents } from '@/hooks/useEvents';
 import { useFeaturedBusinesses } from '@/hooks/useBusinesses';
@@ -31,7 +32,7 @@ const Index = () => {
         <div className="container-news">
           <SectionHeader title="Latest News" viewAllLink="/news" />
           
-          <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-6">
+          <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4 md:gap-6">
             {articlesLoading ? (
               Array.from({ length: 6 }).map((_, i) => (
                 <ArticleCardSkeleton key={i} />
@@ -54,14 +55,18 @@ const Index = () => {
         <div className="container-news">
           <SectionHeader title="Upcoming Events" viewAllLink="/events" />
           
-          <div className="flex gap-4 overflow-x-auto pb-4 scrollbar-hide -mx-4 px-4 sm:mx-0 sm:px-0 sm:grid sm:grid-cols-2 lg:grid-cols-4 sm:overflow-visible">
+          <div className="flex gap-4 overflow-x-auto pb-4 scrollbar-hide -mx-4 px-4 sm:mx-0 sm:px-0 sm:grid sm:grid-cols-2 lg:grid-cols-4 sm:overflow-visible snap-x-mandatory">
             {eventsLoading ? (
               Array.from({ length: 4 }).map((_, i) => (
-                <EventCardSkeleton key={i} />
+                <div key={i} className="min-w-[280px] sm:min-w-0 snap-start">
+                  <EventCardSkeleton />
+                </div>
               ))
             ) : upcomingEvents && upcomingEvents.length > 0 ? (
               upcomingEvents.map((event) => (
-                <EventCard key={event.id} event={event} />
+                <div key={event.id} className="min-w-[280px] sm:min-w-0 snap-start">
+                  <EventCard event={event} />
+                </div>
               ))
             ) : (
               <div className="col-span-full text-center py-12 min-w-full">
@@ -77,22 +82,25 @@ const Index = () => {
         <div className="container-news">
           <SectionHeader 
             title="Discover Local" 
-            viewAllLink="/directory" 
+            viewAllLink="/businesses" 
             viewAllText="View Directory"
           />
           
-          <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-6">
+          <div className="flex gap-4 overflow-x-auto pb-4 scrollbar-hide -mx-4 px-4 sm:mx-0 sm:px-0 sm:grid sm:grid-cols-2 lg:grid-cols-4 sm:overflow-visible snap-x-mandatory">
             {businessesLoading ? (
               Array.from({ length: 4 }).map((_, i) => (
-                <BusinessCardSkeleton key={i} />
+                <div key={i} className="min-w-[280px] sm:min-w-0 snap-start">
+                  <BusinessCardSkeleton />
+                </div>
               ))
             ) : featuredBusinesses && featuredBusinesses.length > 0 ? (
               featuredBusinesses.map((business) => (
-                <BusinessCard 
-                  key={business.id} 
-                  business={business} 
-                  neighborhoodName={business.neighborhood_id ? neighborhoodMap.get(business.neighborhood_id) : undefined}
-                />
+                <div key={business.id} className="min-w-[280px] sm:min-w-0 snap-start">
+                  <BusinessCard 
+                    business={business} 
+                    neighborhoodName={business.neighborhood_id ? neighborhoodMap.get(business.neighborhood_id) : undefined}
+                  />
+                </div>
               ))
             ) : (
               <div className="col-span-full text-center py-12">
@@ -105,22 +113,9 @@ const Index = () => {
 
       {/* Newsletter CTA */}
       <section className="section-spacing bg-primary">
-        <div className="container-news text-center">
-          <h2 className="text-2xl sm:text-3xl font-semibold text-primary-foreground mb-3">
-            Stay Connected to Jacksonville
-          </h2>
-          <p className="text-primary-foreground/80 max-w-xl mx-auto mb-6">
-            Get the latest news, events, and local updates delivered to your inbox.
-          </p>
-          <div className="flex flex-col sm:flex-row gap-3 justify-center max-w-md mx-auto">
-            <input
-              type="email"
-              placeholder="Enter your email"
-              className="flex-1 px-4 py-3 rounded-lg text-foreground bg-white focus:outline-none focus:ring-2 focus:ring-accent"
-            />
-            <button className="px-6 py-3 bg-accent text-accent-foreground font-medium rounded-lg hover:bg-accent/90 transition-colors">
-              Subscribe
-            </button>
+        <div className="container-news">
+          <div className="max-w-2xl mx-auto">
+            <NewsletterSignupForm variant="inline" source="homepage" />
           </div>
         </div>
       </section>
