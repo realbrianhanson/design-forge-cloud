@@ -7,6 +7,7 @@ import { ArticleCard, ArticleCardSkeleton } from '@/components/home/ArticleCard'
 import { EventCard, EventCardSkeleton } from '@/components/home/EventCard';
 import { BusinessCard, BusinessCardSkeleton } from '@/components/home/BusinessCard';
 import { NewsletterSignupForm } from '@/components/newsletter/NewsletterSignupForm';
+import { EmptyArticles, EmptyEvents, EmptyBusinesses } from '@/components/ui/empty-state';
 import { useBreakingNews, useFeaturedArticle, useLatestArticles } from '@/hooks/useArticles';
 import { useUpcomingEvents } from '@/hooks/useEvents';
 import { useFeaturedBusinesses } from '@/hooks/useBusinesses';
@@ -48,8 +49,8 @@ const Index = () => {
                 <ArticleCard key={article.id} article={article} />
               ))
             ) : (
-              <div className="col-span-full text-center py-12">
-                <p className="text-muted-foreground">No articles available yet.</p>
+              <div className="col-span-full">
+                <EmptyArticles />
               </div>
             )}
           </div>
@@ -75,8 +76,8 @@ const Index = () => {
                 </div>
               ))
             ) : (
-              <div className="col-span-full text-center py-12 min-w-full">
-                <p className="text-muted-foreground">No upcoming events.</p>
+              <div className="col-span-full min-w-full">
+                <EmptyEvents />
               </div>
             )}
           </div>
@@ -109,8 +110,8 @@ const Index = () => {
                 </div>
               ))
             ) : (
-              <div className="col-span-full text-center py-12">
-                <p className="text-muted-foreground">No featured businesses yet.</p>
+              <div className="col-span-full">
+                <EmptyBusinesses />
               </div>
             )}
           </div>

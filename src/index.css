@@ -100,7 +100,12 @@
 @layer components {
   /* Premium Card Style */
   .card-premium {
-    @apply bg-card rounded-lg shadow-sm hover:shadow-md transition-shadow duration-200;
+    @apply bg-card rounded-lg shadow-card hover:shadow-card-hover transition-all duration-200;
+  }
+
+  /* Card with interactive hover */
+  .card-interactive {
+    @apply bg-card rounded-lg shadow-card transition-all duration-200 hover:shadow-card-hover hover:-translate-y-0.5;
   }
 
   /* Link Styles */
@@ -129,7 +134,27 @@
 
   /* Subtle hover effect for cards */
   .hover-lift {
-    @apply transition-all duration-200 hover:-translate-y-0.5 hover:shadow-md;
+    @apply transition-all duration-200 hover:-translate-y-0.5 hover:shadow-card-hover;
+  }
+
+  /* Button press effect */
+  .btn-press {
+    @apply active:scale-[0.98] transition-transform duration-100;
+  }
+
+  /* Form input focus ring */
+  .input-focus {
+    @apply focus:ring-2 focus:ring-accent/20 focus:border-accent transition-all duration-200;
+  }
+
+  /* Toast animations */
+  .toast-enter {
+    @apply animate-[slide-in-right_0.3s_ease-out];
+  }
+
+  /* Pulse animation for loading states */
+  .loading-pulse {
+    @apply animate-pulse bg-muted;
   }
 }
 
