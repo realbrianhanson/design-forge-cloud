@@ -10,6 +10,7 @@ import ArticleDetail from "./pages/ArticleDetail";
 import Events from "./pages/Events";
 import EventDetail from "./pages/EventDetail";
 import EventSubmit from "./pages/EventSubmit";
+import Businesses from "./pages/Businesses";
 import NotFound from "./pages/NotFound";
 
 const queryClient = new QueryClient();
@@ -28,6 +29,7 @@ const App = () => (
             <Route path="/events" element={<Events />} />
             <Route path="/events/submit" element={<EventSubmit />} />
             <Route path="/events/:slug" element={<EventDetail />} />
+            <Route path="/businesses" element={<Businesses />} />
             {/* ADD ALL CUSTOM ROUTES ABOVE THE CATCH-ALL "*" ROUTE */}
             <Route path="*" element={<NotFound />} />
           </Routes>
