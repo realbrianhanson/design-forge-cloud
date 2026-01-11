@@ -4,6 +4,7 @@ import { Search, Menu, User, LogOut } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { useAuth } from '@/hooks/useAuth';
 import { useSearchModal } from '@/hooks/useSearchModal';
+import logo from '@/assets/logo.png';
 import {
   DropdownMenu,
   DropdownMenuContent,
@@ -68,13 +69,12 @@ export function Header({ onMenuClick }: HeaderProps) {
         <div className="container-news">
           <div className="flex items-center justify-between h-14 md:h-[72px]">
             {/* Logo */}
-            <Link to="/" className="flex items-baseline gap-0.5 group">
-              <span className="text-xl md:text-[28px] font-bold text-accent transition-colors duration-200">
-                904
-              </span>
-              <span className="text-xl md:text-[28px] font-bold text-primary transition-colors duration-200">
-                NEWS
-              </span>
+            <Link to="/" className="flex items-center group">
+              <img 
+                src={logo} 
+                alt="904 News" 
+                className="h-8 md:h-10 w-auto"
+              />
             </Link>
 
             {/* Desktop Navigation */}
