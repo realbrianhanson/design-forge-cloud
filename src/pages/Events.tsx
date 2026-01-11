@@ -1,13 +1,23 @@
 import { useState, useMemo } from 'react';
 import { Link, useSearchParams } from 'react-router-dom';
-import { Plus, Loader2, X, Calendar, ChevronDown } from 'lucide-react';
-import { format, isToday, isTomorrow, parseISO } from 'date-fns';
+import { Plus, Loader2, X, Calendar, List, Map as MapIcon, ChevronDown } from 'lucide-react';
+import { format, isToday, isTomorrow, parseISO, isSameDay } from 'date-fns';
 import { Layout } from '@/components/layout/Layout';
 import { SEO } from '@/components/SEO';
 import { EventCard, EventCardSkeleton } from '@/components/events/EventCard';
+import { EventCalendarGrid } from '@/components/events/EventCalendarGrid';
+import { EventMapView } from '@/components/events/EventMapView';
+import { FeaturedEventsCarousel } from '@/components/events/FeaturedEventsCarousel';
 import { Button } from '@/components/ui/button';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
-import { useInfiniteEvents, useFeaturedEvents, DateFilter } from '@/hooks/useEvents';
+import { ToggleGroup, ToggleGroupItem } from '@/components/ui/toggle-group';
+import { 
+  useInfiniteEvents, 
+  useFeaturedEvents, 
+  useCalendarEvents,
+  useEventsForDate,
+  DateFilter 
+} from '@/hooks/useEvents';
 import { useNeighborhoods } from '@/hooks/useNeighborhoods';
 import { cn } from '@/lib/utils';
 import { Tables } from '@/integrations/supabase/types';
@@ -30,6 +40,7 @@ const CATEGORIES = [
   { value: 'community', label: 'Community' },
   { value: 'business', label: 'Business' },
   { value: 'nightlife', label: 'Nightlife' },
+  { value: 'government', label: 'Government' },
 ];
 
 const PRICE_FILTERS = [
@@ -38,8 +49,12 @@ const PRICE_FILTERS = [
   { value: 'paid', label: 'Paid' },
 ];
 
+type ViewMode = 'list' | 'calendar' | 'map';
+
 const Events = () => {
   const [searchParams, setSearchParams] = useSearchParams();
+  const [viewMode, setViewMode] = useState<ViewMode>('list');
+  const [selectedDate, setSelectedDate] = useState<Date | null>(null);
   
   const dateFilter = (searchParams.get('date') as DateFilter) || 'all';
   const category = searchParams.get('category') || '';
@@ -47,7 +62,9 @@ const Events = () => {
   const priceType = searchParams.get('price') || '';
 
   const { data: neighborhoods } = useNeighborhoods();
-  const { data: featuredEvents } = useFeaturedEvents(3);
+  const { data: featuredEvents } = useFeaturedEvents(5);
+  const { data: calendarEvents, isLoading: calendarLoading } = useCalendarEvents();
+  const { data: selectedDateEvents } = useEventsForDate(selectedDate);
   
   const {
     data,
@@ -74,22 +91,35 @@ const Events = () => {
 
   const clearFilters = () => {
     setSearchParams({});
+    setSelectedDate(null);
   };
 
-  // Group events by date
-  const groupedEvents = useMemo(() => {
-    const groups: { date: string; label: string; events: Tables<'events'>[] }[] = [];
-    const dateMap = new Map<string, Tables<'events'>[]>();
+  const handleDateSelect = (date: Date) => {
+    if (selectedDate && isSameDay(date, selectedDate)) {
+      setSelectedDate(null); // Deselect if clicking same date
+    } else {
+      setSelectedDate(date);
+    }
+  };
 
-    events.forEach(event => {
+  // Group events by date for list view
+  const groupedEvents = useMemo(() => {
+    const eventsToGroup = selectedDate && selectedDateEvents 
+      ? selectedDateEvents 
+      : events;
+    
+    const groups: { date: string; label: string; events: Tables<'events'>[] }[] = [];
+    const dateMap: Record<string, Tables<'events'>[]> = {};
+
+    eventsToGroup.forEach(event => {
       const dateKey = format(parseISO(event.start_time), 'yyyy-MM-dd');
-      if (!dateMap.has(dateKey)) {
-        dateMap.set(dateKey, []);
+      if (!dateMap[dateKey]) {
+        dateMap[dateKey] = [];
       }
-      dateMap.get(dateKey)!.push(event);
+      dateMap[dateKey].push(event);
     });
 
-    dateMap.forEach((dateEvents, dateKey) => {
+    Object.entries(dateMap).forEach(([dateKey, dateEvents]) => {
       const date = parseISO(dateKey);
       let label: string;
       
@@ -105,9 +135,13 @@ const Events = () => {
     });
 
     return groups.sort((a, b) => a.date.localeCompare(b.date));
-  }, [events]);
+  }, [events, selectedDate, selectedDateEvents]);
 
   const getResultsText = () => {
+    if (selectedDate) {
+      return `${selectedDateEvents?.length || 0} event${(selectedDateEvents?.length || 0) !== 1 ? 's' : ''} on ${format(selectedDate, 'MMMM d, yyyy')}`;
+    }
+    
     let text = `${totalCount} event${totalCount !== 1 ? 's' : ''}`;
     
     if (dateFilter !== 'all') {
@@ -150,44 +184,63 @@ const Events = () => {
             </Link>
           </div>
 
-          {/* Featured Events Carousel (if any) */}
+          {/* Featured Events Carousel */}
           {featuredEvents && featuredEvents.length > 0 && (
             <div className="mb-8">
-              <h2 className="text-lg font-semibold text-primary mb-4 flex items-center gap-2">
-                <Calendar className="w-5 h-5 text-accent" />
-                Featured Events
-              </h2>
-              <div className="flex gap-4 overflow-x-auto pb-2 scrollbar-hide -mx-4 px-4 sm:mx-0 sm:px-0 snap-x-mandatory">
-                {featuredEvents.map(event => (
-                  <div key={event.id} className="min-w-[280px] sm:min-w-[350px] snap-start">
-                    <EventCard event={event} variant="horizontal" />
-                  </div>
-                ))}
-              </div>
+              <FeaturedEventsCarousel events={featuredEvents} />
             </div>
           )}
 
-          {/* Filter Bar */}
+          {/* View Mode Toggle & Filters */}
           <div className="bg-card rounded-xl shadow-card p-4 mb-6">
-            {/* Date Filter Pills */}
-            <div className="flex gap-2 overflow-x-auto pb-3 mb-3 border-b border-border scrollbar-hide snap-x-mandatory -mx-4 px-4 sm:mx-0 sm:px-0">
-              {DATE_FILTERS.map(filter => (
-                <button
-                  key={filter.value}
-                  onClick={() => updateFilter('date', filter.value === 'all' ? '' : filter.value)}
-                  className={cn(
-                    "px-4 py-2.5 min-h-[44px] rounded-full text-sm font-medium whitespace-nowrap transition-colors snap-start",
-                    dateFilter === filter.value || (filter.value === 'all' && !dateFilter)
-                      ? "bg-primary text-primary-foreground"
-                      : "bg-muted text-muted-foreground hover:bg-muted/80 border border-border"
-                  )}
-                >
-                  {filter.label}
-                </button>
-              ))}
+            {/* View Mode Toggle */}
+            <div className="flex items-center justify-between pb-3 mb-3 border-b border-border">
+              <span className="text-sm font-medium text-muted-foreground">View:</span>
+              <ToggleGroup 
+                type="single" 
+                value={viewMode} 
+                onValueChange={(v) => v && setViewMode(v as ViewMode)}
+                className="bg-muted rounded-lg p-1"
+              >
+                <ToggleGroupItem value="list" aria-label="List view" className="px-3 py-1.5 data-[state=on]:bg-background">
+                  <List className="w-4 h-4 mr-1.5" />
+                  List
+                </ToggleGroupItem>
+                <ToggleGroupItem value="calendar" aria-label="Calendar view" className="px-3 py-1.5 data-[state=on]:bg-background">
+                  <Calendar className="w-4 h-4 mr-1.5" />
+                  Calendar
+                </ToggleGroupItem>
+                <ToggleGroupItem value="map" aria-label="Map view" className="px-3 py-1.5 data-[state=on]:bg-background">
+                  <Map className="w-4 h-4 mr-1.5" />
+                  Map
+                </ToggleGroupItem>
+              </ToggleGroup>
             </div>
 
-            {/* Dropdown Filters - stacked on mobile */}
+            {/* Date Filter Pills - hide in calendar mode */}
+            {viewMode !== 'calendar' && (
+              <div className="flex gap-2 overflow-x-auto pb-3 mb-3 border-b border-border scrollbar-hide snap-x-mandatory -mx-4 px-4 sm:mx-0 sm:px-0">
+                {DATE_FILTERS.map(filter => (
+                  <button
+                    key={filter.value}
+                    onClick={() => {
+                      updateFilter('date', filter.value === 'all' ? '' : filter.value);
+                      setSelectedDate(null);
+                    }}
+                    className={cn(
+                      "px-4 py-2.5 min-h-[44px] rounded-full text-sm font-medium whitespace-nowrap transition-colors snap-start",
+                      dateFilter === filter.value || (filter.value === 'all' && !dateFilter)
+                        ? "bg-primary text-primary-foreground"
+                        : "bg-muted text-muted-foreground hover:bg-muted/80 border border-border"
+                    )}
+                  >
+                    {filter.label}
+                  </button>
+                ))}
+              </div>
+            )}
+
+            {/* Dropdown Filters */}
             <div className="flex flex-col sm:flex-row gap-3">
               <Select value={category} onValueChange={(v) => updateFilter('category', v)}>
                 <SelectTrigger className="w-full sm:w-[180px] min-h-[44px]">
@@ -236,7 +289,7 @@ const Events = () => {
             <p className="text-sm text-muted-foreground">
               Showing {getResultsText()}
             </p>
-            {hasActiveFilters && (
+            {(hasActiveFilters || selectedDate) && (
               <button 
                 onClick={clearFilters}
                 className="text-sm text-accent hover:text-accent/80 flex items-center gap-1 transition-colors"
@@ -247,56 +300,98 @@ const Events = () => {
             )}
           </div>
 
-          {/* Events List */}
-          {isLoading ? (
-            <div className="space-y-4">
-              {Array.from({ length: 5 }).map((_, i) => (
-                <EventCardSkeleton key={i} />
-              ))}
-            </div>
-          ) : groupedEvents.length > 0 ? (
-            <div className="space-y-6">
-              {groupedEvents.map(group => (
-                <div key={group.date}>
-                  {/* Date Group Header */}
-                  <div className="sticky top-0 z-10 bg-surface py-2 px-4 -mx-4 sm:mx-0 sm:px-0 sm:bg-transparent mb-3">
-                    <h3 className="text-sm font-semibold text-muted-foreground">
-                      {group.label}
-                    </h3>
-                  </div>
-                  
-                  {/* Events in Group */}
-                  <div className="space-y-3">
-                    {group.events.map(event => (
-                      <EventCard key={event.id} event={event} />
-                    ))}
-                  </div>
-                </div>
-              ))}
-            </div>
-          ) : (
-            <EmptyState hasFilters={hasActiveFilters} onClearFilters={clearFilters} />
-          )}
+          {/* Content based on view mode */}
+          {viewMode === 'calendar' ? (
+            <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
+              {/* Calendar Grid */}
+              <div className="lg:col-span-2">
+                <EventCalendarGrid
+                  events={calendarEvents || []}
+                  selectedDate={selectedDate}
+                  onDateSelect={handleDateSelect}
+                  isLoading={calendarLoading}
+                />
+              </div>
 
-          {/* Load More Button */}
-          {hasNextPage && (
-            <div className="flex justify-center mt-8">
-              <Button
-                variant="outline"
-                onClick={() => fetchNextPage()}
-                disabled={isFetchingNextPage}
-                className="min-w-[200px]"
-              >
-                {isFetchingNextPage ? (
-                  <>
-                    <Loader2 className="w-4 h-4 mr-2 animate-spin" />
-                    Loading...
-                  </>
+              {/* Selected Date Events */}
+              <div>
+                <h3 className="text-lg font-semibold text-primary mb-4">
+                  {selectedDate 
+                    ? format(selectedDate, 'EEEE, MMMM d') 
+                    : 'Select a date'}
+                </h3>
+                {selectedDate ? (
+                  selectedDateEvents && selectedDateEvents.length > 0 ? (
+                    <div className="space-y-3">
+                      {selectedDateEvents.map(event => (
+                        <EventCard key={event.id} event={event} variant="compact" />
+                      ))}
+                    </div>
+                  ) : (
+                    <div className="text-center py-8 text-muted-foreground">
+                      <Calendar className="w-12 h-12 mx-auto mb-2 opacity-50" />
+                      <p>No events on this date</p>
+                    </div>
+                  )
                 ) : (
-                  'Show More Events'
+                  <div className="text-center py-8 text-muted-foreground">
+                    <p>Click a date on the calendar to see events</p>
+                  </div>
                 )}
-              </Button>
+              </div>
             </div>
+          ) : viewMode === 'map' ? (
+            <EventMapView events={events} isLoading={isLoading} />
+          ) : (
+            /* List View */
+            <>
+              {isLoading ? (
+                <div className="space-y-4">
+                  {Array.from({ length: 5 }).map((_, i) => (
+                    <EventCardSkeleton key={i} />
+                  ))}
+                </div>
+              ) : groupedEvents.length > 0 ? (
+                <div className="space-y-6">
+                  {groupedEvents.map(group => (
+                    <div key={group.date}>
+                      <div className="sticky top-0 z-10 bg-surface py-2 px-4 -mx-4 sm:mx-0 sm:px-0 sm:bg-transparent mb-3">
+                        <h3 className="text-sm font-semibold text-muted-foreground">
+                          {group.label}
+                        </h3>
+                      </div>
+                      <div className="space-y-3">
+                        {group.events.map(event => (
+                          <EventCard key={event.id} event={event} />
+                        ))}
+                      </div>
+                    </div>
+                  ))}
+                </div>
+              ) : (
+                <EmptyState hasFilters={hasActiveFilters} onClearFilters={clearFilters} />
+              )}
+
+              {hasNextPage && !selectedDate && (
+                <div className="flex justify-center mt-8">
+                  <Button
+                    variant="outline"
+                    onClick={() => fetchNextPage()}
+                    disabled={isFetchingNextPage}
+                    className="min-w-[200px]"
+                  >
+                    {isFetchingNextPage ? (
+                      <>
+                        <Loader2 className="w-4 h-4 mr-2 animate-spin" />
+                        Loading...
+                      </>
+                    ) : (
+                      'Show More Events'
+                    )}
+                  </Button>
+                </div>
+              )}
+            </>
           )}
         </div>
       </div>

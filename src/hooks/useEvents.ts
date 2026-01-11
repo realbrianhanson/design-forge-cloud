@@ -1,7 +1,19 @@
-import { useQuery, useInfiniteQuery } from '@tanstack/react-query';
+import { useQuery, useInfiniteQuery, useMutation, useQueryClient } from '@tanstack/react-query';
 import { supabase } from '@/integrations/supabase/client';
 import { Tables } from '@/integrations/supabase/types';
-import { startOfDay, endOfDay, startOfWeek, endOfWeek, startOfMonth, endOfMonth, addDays, isFriday, nextFriday, nextSunday } from 'date-fns';
+import { 
+  startOfDay, 
+  endOfDay, 
+  startOfWeek, 
+  endOfWeek, 
+  startOfMonth, 
+  endOfMonth, 
+  addMonths, 
+  isFriday, 
+  nextFriday, 
+  nextSunday,
+  subHours
+} from 'date-fns';
 
 export type DateFilter = 'all' | 'today' | 'weekend' | 'week' | 'month';
 
@@ -186,5 +198,157 @@ export const useSimilarEvents = (
     },
     enabled: !!category && !!excludeId,
     staleTime: 1000 * 60 * 10,
+  });
+};
+
+// Fetch events for calendar view (entire month)
+export const useCalendarEvents = (month: Date = new Date()) => {
+  return useQuery({
+    queryKey: ['calendar-events', month.getFullYear(), month.getMonth()],
+    queryFn: async () => {
+      // Get events for current month + padding for calendar view
+      const monthStart = startOfMonth(month);
+      const monthEnd = endOfMonth(month);
+      const calendarStart = startOfWeek(monthStart, { weekStartsOn: 0 });
+      const calendarEnd = endOfWeek(monthEnd, { weekStartsOn: 0 });
+
+      const { data, error } = await supabase
+        .from('events')
+        .select('*')
+        .eq('status', 'approved')
+        .gte('start_time', calendarStart.toISOString())
+        .lte('start_time', calendarEnd.toISOString())
+        .order('start_time', { ascending: true });
+
+      if (error) throw error;
+      return data as Tables<'events'>[];
+    },
+    staleTime: 1000 * 60 * 5,
+  });
+};
+
+// Fetch events for a specific date
+export const useEventsForDate = (date: Date | null) => {
+  return useQuery({
+    queryKey: ['events-for-date', date?.toISOString()],
+    queryFn: async () => {
+      if (!date) return [];
+
+      const dayStart = startOfDay(date);
+      const dayEnd = endOfDay(date);
+
+      const { data, error } = await supabase
+        .from('events')
+        .select('*')
+        .eq('status', 'approved')
+        .gte('start_time', dayStart.toISOString())
+        .lte('start_time', dayEnd.toISOString())
+        .order('start_time', { ascending: true });
+
+      if (error) throw error;
+      return data as Tables<'events'>[];
+    },
+    enabled: !!date,
+    staleTime: 1000 * 60 * 5,
+  });
+};
+
+// Fetch weekend events for widget
+export const useWeekendEvents = (limit: number = 10) => {
+  return useQuery({
+    queryKey: ['weekend-events', limit],
+    queryFn: async () => {
+      const now = new Date();
+      const friday = isFriday(now) ? startOfDay(now) : startOfDay(nextFriday(now));
+      const sunday = endOfDay(nextSunday(friday));
+
+      const { data, error } = await supabase
+        .from('events')
+        .select('*')
+        .eq('status', 'approved')
+        .gte('start_time', friday.toISOString())
+        .lte('start_time', sunday.toISOString())
+        .order('start_time', { ascending: true })
+        .limit(limit);
+
+      if (error) throw error;
+      return data as Tables<'events'>[];
+    },
+    staleTime: 1000 * 60 * 10,
+  });
+};
+
+// Set event reminder
+export const useSetEventReminder = () => {
+  const queryClient = useQueryClient();
+
+  return useMutation({
+    mutationFn: async ({ eventId, eventStartTime }: { eventId: string; eventStartTime: string }) => {
+      const { data: { user } } = await supabase.auth.getUser();
+      if (!user) throw new Error('Not authenticated');
+
+      // Remind 24 hours before event
+      const remindAt = subHours(new Date(eventStartTime), 24);
+
+      const { error } = await supabase
+        .from('event_reminders')
+        .upsert({
+          user_id: user.id,
+          event_id: eventId,
+          remind_at: remindAt.toISOString(),
+          reminded: false,
+        });
+
+      if (error) throw error;
+    },
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: ['event-reminders'] });
+    },
+  });
+};
+
+// Check if user has reminder for event
+export const useEventReminder = (eventId: string) => {
+  return useQuery({
+    queryKey: ['event-reminder', eventId],
+    queryFn: async () => {
+      const { data: { user } } = await supabase.auth.getUser();
+      if (!user) return null;
+
+      const { data, error } = await supabase
+        .from('event_reminders')
+        .select('*')
+        .eq('user_id', user.id)
+        .eq('event_id', eventId)
+        .maybeSingle();
+
+      if (error) throw error;
+      return data;
+    },
+    staleTime: 1000 * 60 * 5,
+  });
+};
+
+// Remove event reminder
+export const useRemoveEventReminder = () => {
+  const queryClient = useQueryClient();
+
+  return useMutation({
+    mutationFn: async (eventId: string) => {
+      const { data: { user } } = await supabase.auth.getUser();
+      if (!user) throw new Error('Not authenticated');
+
+      const { error } = await supabase
+        .from('event_reminders')
+        .delete()
+        .eq('user_id', user.id)
+        .eq('event_id', eventId);
+
+      if (error) throw error;
+    },
+    onSuccess: (_, eventId) => {
+      queryClient.invalidateQueries({ queryKey: ['event-reminder', eventId] });
+      queryClient.invalidateQueries({ queryKey: ['event-reminders'] });
+    },
   });
 };
