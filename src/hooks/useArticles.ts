@@ -23,7 +23,7 @@ export const useBreakingNews = () => {
       if (error) throw error;
       return data as Tables<'articles'> | null;
     },
-    staleTime: 1000 * 60 * 5, // 5 minutes
+    staleTime: 1000 * 60 * 5,
   });
 };
 
@@ -124,7 +124,7 @@ export const useTrendingArticles = (limit: number = 5) => {
       if (error) throw error;
       return data as Tables<'articles'>[];
     },
-    staleTime: 1000 * 60 * 10, // 10 minutes
+    staleTime: 1000 * 60 * 10,
   });
 };
 
@@ -158,5 +158,27 @@ export const useArticle = (slugOrId: string) => {
       return data as Tables<'articles'> | null;
     },
     enabled: !!slugOrId,
+  });
+};
+
+// Fetch related articles (same category, excluding current)
+export const useRelatedArticles = (category: string, excludeId: string, limit: number = 3) => {
+  return useQuery({
+    queryKey: ['related-articles', category, excludeId, limit],
+    queryFn: async () => {
+      const { data, error } = await supabase
+        .from('articles')
+        .select('*')
+        .eq('status', 'active')
+        .eq('category', category)
+        .neq('id', excludeId)
+        .order('published_at', { ascending: false })
+        .limit(limit);
+
+      if (error) throw error;
+      return data as Tables<'articles'>[];
+    },
+    enabled: !!category && !!excludeId,
+    staleTime: 1000 * 60 * 10,
   });
 };
