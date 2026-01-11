@@ -63,18 +63,14 @@ export const SEO = ({
       <meta name="twitter:site" content="@904News" />
 
       {/* Article-specific */}
-      {article && (
-        <>
-          {article.publishedTime && (
-            <meta property="article:published_time" content={article.publishedTime} />
-          )}
-          {article.modifiedTime && (
-            <meta property="article:modified_time" content={article.modifiedTime} />
-          )}
-          {article.author && <meta property="article:author" content={article.author} />}
-          {article.section && <meta property="article:section" content={article.section} />}
-        </>
+      {article?.publishedTime && (
+        <meta property="article:published_time" content={article.publishedTime} />
       )}
+      {article?.modifiedTime && (
+        <meta property="article:modified_time" content={article.modifiedTime} />
+      )}
+      {article?.author && <meta property="article:author" content={article.author} />}
+      {article?.section && <meta property="article:section" content={article.section} />}
 
       {/* Structured Data / JSON-LD */}
       {structuredData && (
