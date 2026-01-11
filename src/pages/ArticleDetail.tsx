@@ -9,6 +9,7 @@ import { EngagementBar } from '@/components/article/EngagementBar';
 import { AiSummaryCard } from '@/components/article/AiSummaryCard';
 import { CommentsSection } from '@/components/article/CommentsSection';
 import { SourceBadge } from '@/components/article/SourceBadge';
+import { RelatedIncidentCard } from '@/components/crime/RelatedIncidentCard';
 import { Button } from '@/components/ui/button';
 import { Skeleton } from '@/components/ui/skeleton';
 import { Alert, AlertDescription } from '@/components/ui/alert';
@@ -74,6 +75,8 @@ const ArticleDetail = () => {
 
   const categoryStyles = getCategoryStyles(article.category);
   const isAggregated = article.content_type === 'aggregated';
+  const isCrimeArticle = article.category?.toLowerCase() === 'crime';
+  const hasRelatedIncident = !!(article as { related_incident_id?: string }).related_incident_id;
   // Placeholder for auth - would normally come from auth context
   const isLoggedIn = false;
   const articleUrl = `/news/${article.slug || article.id}`;
@@ -216,6 +219,16 @@ const ArticleDetail = () => {
                   904News aggregates local news with AI-generated summaries. Support local journalism by visiting the original source.
                 </AlertDescription>
               </Alert>
+            </div>
+          )}
+
+          {/* Related Crime Incident (for crime articles) */}
+          {isCrimeArticle && hasRelatedIncident && (
+            <div className="mt-8">
+              <h3 className="text-lg font-semibold text-primary mb-4">Related Incident</h3>
+              <RelatedIncidentCard 
+                incidentId={(article as { related_incident_id: string }).related_incident_id} 
+              />
             </div>
           )}
 

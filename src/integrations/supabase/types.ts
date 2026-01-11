@@ -78,6 +78,7 @@ export type Database = {
           is_featured: boolean | null
           neighborhood_id: string | null
           published_at: string | null
+          related_incident_id: string | null
           rss_source_id: string | null
           slug: string | null
           source_name: string
@@ -104,6 +105,7 @@ export type Database = {
           is_featured?: boolean | null
           neighborhood_id?: string | null
           published_at?: string | null
+          related_incident_id?: string | null
           rss_source_id?: string | null
           slug?: string | null
           source_name: string
@@ -130,6 +132,7 @@ export type Database = {
           is_featured?: boolean | null
           neighborhood_id?: string | null
           published_at?: string | null
+          related_incident_id?: string | null
           rss_source_id?: string | null
           slug?: string | null
           source_name?: string
@@ -146,6 +149,13 @@ export type Database = {
             columns: ["neighborhood_id"]
             isOneToOne: false
             referencedRelation: "neighborhoods"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "articles_related_incident_id_fkey"
+            columns: ["related_incident_id"]
+            isOneToOne: false
+            referencedRelation: "crime_incidents"
             referencedColumns: ["id"]
           },
           {
