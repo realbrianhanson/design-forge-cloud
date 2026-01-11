@@ -11,7 +11,7 @@ import { cn } from '@/lib/utils';
 
 const CATEGORIES = [
   { value: '', label: 'All' },
-  { value: 'local', label: 'Local' },
+  { value: 'local_news', label: 'Local' },
   { value: 'crime', label: 'Crime' },
   { value: 'politics', label: 'Politics' },
   { value: 'business', label: 'Business' },
