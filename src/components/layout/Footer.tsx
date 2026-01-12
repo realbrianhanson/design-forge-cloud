@@ -5,26 +5,24 @@ import { Input } from '@/components/ui/input';
 import logo from '@/assets/logo.png';
 
 const sectionLinks = [
-  { label: 'Local News', href: '/category/local' },
-  { label: 'Crime & Safety', href: '/category/crime-safety' },
-  { label: 'Politics', href: '/category/politics' },
-  { label: 'Business', href: '/category/business' },
-  { label: 'Sports', href: '/category/sports' },
-  { label: 'Entertainment', href: '/category/entertainment' },
+  { label: 'Local News', href: '/news?category=local' },
+  { label: 'Crime & Safety', href: '/news/crime' },
+  { label: 'Politics', href: '/news?category=politics' },
+  { label: 'Business', href: '/news?category=business' },
+  { label: 'Sports', href: '/news?category=sports' },
+  { label: 'Entertainment', href: '/news?category=entertainment' },
 ];
 
 const companyLinks = [
-  { label: 'About Us', href: '/about' },
-  { label: 'Contact', href: '/contact' },
-  { label: 'Advertise', href: '/advertise' },
-  { label: 'Careers', href: '/careers' },
-  { label: 'Press', href: '/press' },
+  { label: 'About Us', href: '/news' },
+  { label: 'Neighborhoods', href: '/neighborhoods' },
+  { label: 'Weather', href: '/weather' },
+  { label: 'Crime Map', href: '/crime' },
+  { label: 'Newsletter', href: '/newsletter' },
 ];
-
 const legalLinks = [
-  { label: 'Privacy Policy', href: '/privacy' },
-  { label: 'Terms of Service', href: '/terms' },
-  { label: 'Cookie Policy', href: '/cookies' },
+  { label: 'Privacy Policy', href: '/news' },
+  { label: 'Terms of Service', href: '/news' },
 ];
 
 export function Footer() {
