@@ -2,6 +2,7 @@ import { ExternalLink, Radio, Waves, AlertTriangle, MapPin } from 'lucide-react'
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
 import { SEO } from '@/components/SEO';
+import { Layout } from '@/components/layout/Layout';
 import { WeatherWidget } from '@/components/weather/WeatherWidget';
 import { useWeatherAlerts } from '@/hooks/useWeather';
 
@@ -11,7 +12,7 @@ export default function Weather() {
   const isHurricaneSeason = currentMonth >= 5 && currentMonth <= 10; // June-November
 
   return (
-    <>
+    <Layout>
       <SEO 
         title="Jacksonville Weather - Current Conditions & Forecast"
         description="Current weather conditions, 7-day forecast, and severe weather alerts for Jacksonville, Florida."
@@ -198,6 +199,6 @@ export default function Weather() {
           </aside>
         </div>
       </div>
-    </>
+    </Layout>
   );
 }
