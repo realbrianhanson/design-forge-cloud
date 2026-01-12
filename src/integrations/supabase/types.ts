@@ -593,6 +593,7 @@ export type Database = {
           created_at: string | null
           description: string | null
           end_time: string | null
+          external_id: string | null
           id: string
           image_url: string | null
           is_featured: boolean | null
@@ -620,6 +621,7 @@ export type Database = {
           created_at?: string | null
           description?: string | null
           end_time?: string | null
+          external_id?: string | null
           id?: string
           image_url?: string | null
           is_featured?: boolean | null
@@ -647,6 +649,7 @@ export type Database = {
           created_at?: string | null
           description?: string | null
           end_time?: string | null
+          external_id?: string | null
           id?: string
           image_url?: string | null
           is_featured?: boolean | null

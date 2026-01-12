@@ -354,9 +354,9 @@ Deno.serve(async (req) => {
           end_time: endDateTime,
           location_name: event.location || 'City of Jacksonville',
           location_address: event.location?.includes('Jacksonville') ? event.location : null,
-          source_type: 'city',
+          source_type: 'imported',
           external_id: externalId,
-          external_url: event.url,
+          ticket_url: event.url,
           status: 'approved',
           organizer_name: 'City of Jacksonville',
           slug: generateSlug(event.title) + '-' + Date.now().toString(36),
@@ -371,7 +371,7 @@ Deno.serve(async (req) => {
               end_time: eventData.end_time,
               location_name: eventData.location_name,
               location_address: eventData.location_address,
-              external_url: eventData.external_url,
+              ticket_url: eventData.ticket_url,
             })
             .eq('id', existing.id);
           
