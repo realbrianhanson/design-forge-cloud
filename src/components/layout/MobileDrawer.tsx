@@ -17,17 +17,17 @@ const mainNavLinks = [
   { label: 'News', href: '/news' },
   { label: 'Events', href: '/events' },
   { label: 'Businesses', href: '/businesses' },
-  { label: 'Community', href: '/community' },
-  { label: 'Sports', href: '/sports' },
+  { label: 'Neighborhoods', href: '/neighborhoods' },
+  { label: 'Weather', href: '/weather' },
 ];
 
 const categoryLinks = [
-  { label: 'Local News', href: '/category/local' },
-  { label: 'Crime & Safety', href: '/category/crime-safety' },
-  { label: 'Politics', href: '/category/politics' },
-  { label: 'Business', href: '/category/business' },
-  { label: 'Entertainment', href: '/category/entertainment' },
-  { label: 'Weather', href: '/category/weather' },
+  { label: 'Local News', href: '/news?category=local' },
+  { label: 'Crime & Safety', href: '/news/crime' },
+  { label: 'Politics', href: '/news?category=politics' },
+  { label: 'Business', href: '/news?category=business' },
+  { label: 'Entertainment', href: '/news?category=entertainment' },
+  { label: 'Weather', href: '/weather' },
 ];
 
 export function MobileDrawer({ isOpen, onClose }: MobileDrawerProps) {

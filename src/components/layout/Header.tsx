@@ -18,19 +18,19 @@ const mainNavLinks = [
   { label: 'News', href: '/news' },
   { label: 'Events', href: '/events' },
   { label: 'Businesses', href: '/businesses' },
-  { label: 'Community', href: '/community' },
-  { label: 'Sports', href: '/sports' },
+  { label: 'Neighborhoods', href: '/neighborhoods' },
+  { label: 'Weather', href: '/weather' },
 ];
 
 const categoryLinks = [
-  { label: 'Local News', href: '/category/local' },
-  { label: 'Crime & Safety', href: '/category/crime-safety' },
-  { label: 'Politics', href: '/category/politics' },
-  { label: 'Business', href: '/category/business' },
-  { label: 'Sports', href: '/category/sports' },
-  { label: 'Entertainment', href: '/category/entertainment' },
-  { label: 'Weather', href: '/category/weather' },
-  { label: 'Traffic', href: '/category/traffic' },
+  { label: 'Local News', href: '/news?category=local' },
+  { label: 'Crime & Safety', href: '/news/crime' },
+  { label: 'Politics', href: '/news?category=politics' },
+  { label: 'Business', href: '/news?category=business' },
+  { label: 'Sports', href: '/news?category=sports' },
+  { label: 'Entertainment', href: '/news?category=entertainment' },
+  { label: 'Weather', href: '/weather' },
+  { label: 'Traffic', href: '/news?category=traffic' },
 ];
 
 interface HeaderProps {
