@@ -76,6 +76,7 @@ export type Database = {
           image_url: string | null
           is_breaking: boolean | null
           is_featured: boolean | null
+          language: string | null
           neighborhood_id: string | null
           published_at: string | null
           related_incident_id: string | null
@@ -103,6 +104,7 @@ export type Database = {
           image_url?: string | null
           is_breaking?: boolean | null
           is_featured?: boolean | null
+          language?: string | null
           neighborhood_id?: string | null
           published_at?: string | null
           related_incident_id?: string | null
@@ -130,6 +132,7 @@ export type Database = {
           image_url?: string | null
           is_breaking?: boolean | null
           is_featured?: boolean | null
+          language?: string | null
           neighborhood_id?: string | null
           published_at?: string | null
           related_incident_id?: string | null
