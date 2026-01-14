@@ -6,6 +6,7 @@ import { BrowserRouter, Routes, Route } from "react-router-dom";
 import { HelmetProvider } from "react-helmet-async";
 import { AuthProvider } from "@/hooks/useAuth";
 import { SearchModalProvider } from "@/hooks/useSearchModal";
+import { LanguageProvider } from "@/hooks/useLanguage";
 import { SearchModal } from "@/components/search/SearchModal";
 import { useSearchModal } from "@/hooks/useSearchModal";
 import { ErrorBoundary } from "@/components/ui/error-boundary";
@@ -59,12 +60,13 @@ const App = () => (
     <HelmetProvider>
       <QueryClientProvider client={queryClient}>
         <AuthProvider>
-          <SearchModalProvider>
-            <TooltipProvider>
-              <Toaster />
-              <Sonner />
-              <BrowserRouter>
-                <SearchModalWrapper />
+          <LanguageProvider>
+            <SearchModalProvider>
+              <TooltipProvider>
+                <Toaster />
+                <Sonner />
+                <BrowserRouter>
+                  <SearchModalWrapper />
                 <Routes>
                   <Route path="/" element={<Index />} />
                   <Route path="/news" element={<News />} />
@@ -117,9 +119,10 @@ const App = () => (
                   {/* ADD ALL CUSTOM ROUTES ABOVE THE CATCH-ALL "*" ROUTE */}
                   <Route path="*" element={<NotFound />} />
                 </Routes>
-              </BrowserRouter>
-            </TooltipProvider>
-          </SearchModalProvider>
+                </BrowserRouter>
+              </TooltipProvider>
+            </SearchModalProvider>
+          </LanguageProvider>
         </AuthProvider>
       </QueryClientProvider>
     </HelmetProvider>

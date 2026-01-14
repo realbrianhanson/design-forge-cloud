@@ -7,24 +7,27 @@ import { ArticleCard, ArticleCardSkeleton } from '@/components/home/ArticleCard'
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { useInfiniteArticles, useTrendingArticles } from '@/hooks/useArticles';
+import { useLanguage } from '@/hooks/useLanguage';
 import { cn } from '@/lib/utils';
 
-const CATEGORIES = [
-  { value: '', label: 'All' },
-  { value: 'local_news', label: 'Local' },
-  { value: 'crime', label: 'Crime' },
-  { value: 'politics', label: 'Politics' },
-  { value: 'business', label: 'Business' },
-  { value: 'sports', label: 'Sports' },
-  { value: 'entertainment', label: 'Entertainment' },
-  { value: 'weather', label: 'Weather' },
-];
+// Category values remain constant for filtering (database values)
+const CATEGORY_VALUES = [
+  { value: '', labelKey: 'all' },
+  { value: 'local_news', labelKey: 'local' },
+  { value: 'crime', labelKey: 'crime' },
+  { value: 'politics', labelKey: 'politics' },
+  { value: 'business', labelKey: 'business' },
+  { value: 'sports', labelKey: 'sports' },
+  { value: 'entertainment', labelKey: 'entertainment' },
+  { value: 'weather', labelKey: 'weather' },
+] as const;
 
 const News = () => {
   const [searchParams, setSearchParams] = useSearchParams();
   const navigate = useNavigate();
   const activeCategory = searchParams.get('category') || '';
   const [searchQuery, setSearchQuery] = useState('');
+  const { t, language } = useLanguage();
 
   const {
     data,
@@ -37,6 +40,21 @@ const News = () => {
   const { data: trendingArticles, isLoading: trendingLoading } = useTrendingArticles(5);
 
   const articles = data?.pages.flatMap(page => page.articles) ?? [];
+
+  // Get translated category label
+  const getCategoryLabel = (labelKey: string) => {
+    const labels: Record<string, string> = {
+      all: t.news.all,
+      local: t.news.local,
+      crime: t.news.crime,
+      politics: t.categories.politics,
+      business: t.categories.business,
+      sports: t.categories.sports,
+      entertainment: t.categories.entertainment,
+      weather: t.categories.weather,
+    };
+    return labels[labelKey] || labelKey;
+  };
 
   const handleCategoryChange = (category: string) => {
     if (category) {
@@ -54,15 +72,15 @@ const News = () => {
   };
 
   const getCategoryTitle = () => {
-    if (!activeCategory) return 'Latest News';
-    const cat = CATEGORIES.find(c => c.value === activeCategory);
-    return cat ? `${cat.label} News` : 'Latest News';
+    if (!activeCategory) return t.news.latestNews;
+    const cat = CATEGORY_VALUES.find(c => c.value === activeCategory);
+    return cat ? `${getCategoryLabel(cat.labelKey)} ${t.nav.news}` : t.news.latestNews;
   };
 
   const getCategoryDescription = () => {
-    if (!activeCategory) return 'Stay informed with Jacksonville\'s top stories and breaking news.';
-    const cat = CATEGORIES.find(c => c.value === activeCategory);
-    return cat ? `Jacksonville ${cat.label.toLowerCase()} news and updates. Stay informed with the latest ${cat.label.toLowerCase()} stories.` : '';
+    if (!activeCategory) return t.news.stayInformed;
+    const cat = CATEGORY_VALUES.find(c => c.value === activeCategory);
+    return cat ? `Jacksonville ${getCategoryLabel(cat.labelKey).toLowerCase()} ${language === 'es' ? 'noticias y actualizaciones' : 'news and updates'}.` : '';
   };
 
   return (
@@ -79,16 +97,16 @@ const News = () => {
             <main className="flex-1 lg:max-w-[65%]">
               {/* Page Header */}
               <div className="mb-6 md:mb-8">
-                <h1 className="text-2xl md:text-3xl font-bold text-primary">Latest News</h1>
+                <h1 className="text-2xl md:text-3xl font-bold text-primary">{t.news.latestNews}</h1>
                 <p className="text-muted-foreground mt-1 text-sm md:text-base">
-                  Stay informed with Jacksonville's top stories
+                  {t.news.stayInformed}
                 </p>
               </div>
 
               {/* Category Filter Bar */}
               <div className="sticky top-14 md:top-0 z-10 bg-background border-b border-border py-3 -mx-4 px-4 sm:mx-0 sm:px-0 mb-6">
                 <div className="flex gap-2 overflow-x-auto scrollbar-hide pb-1 snap-x-mandatory">
-                  {CATEGORIES.map((category) => (
+                  {CATEGORY_VALUES.map((category) => (
                     <button
                       key={category.value}
                       onClick={() => handleCategoryChange(category.value)}
@@ -99,7 +117,7 @@ const News = () => {
                           : "bg-muted text-muted-foreground hover:bg-muted/80"
                       )}
                     >
-                      {category.label}
+                      {getCategoryLabel(category.labelKey)}
                     </button>
                   ))}
                 </div>
@@ -141,10 +159,10 @@ const News = () => {
                     {isFetchingNextPage ? (
                       <>
                         <Loader2 className="w-4 h-4 mr-2 animate-spin" />
-                        Loading...
+                        {t.news.loading}
                       </>
                     ) : (
-                      'Load More Articles'
+                      t.news.loadMore
                     )}
                   </Button>
                 </div>
@@ -158,7 +176,7 @@ const News = () => {
                 <Search className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-muted-foreground" />
                 <Input
                   type="search"
-                  placeholder="Search articles..."
+                  placeholder={t.news.searchArticles}
                   value={searchQuery}
                   onChange={(e) => setSearchQuery(e.target.value)}
                   className="pl-10 shadow-sm"
@@ -168,7 +186,7 @@ const News = () => {
               {/* Trending Section */}
               <div className="bg-card rounded-xl p-5 shadow-card">
                 <h3 className="text-lg font-semibold text-card-foreground mb-4 flex items-center gap-2">
-                  Trending <span>🔥</span>
+                  {t.news.trending} <span>🔥</span>
                 </h3>
                 <div className="space-y-1">
                   {trendingLoading ? (
@@ -201,43 +219,43 @@ const News = () => {
               <div className="bg-gradient-to-br from-muted to-muted/50 rounded-xl p-6">
                 <div className="text-3xl mb-3">✉️</div>
                 <h3 className="text-lg font-semibold text-card-foreground">
-                  Daily Jacksonville Digest
+                  {t.newsletter.title}
                 </h3>
                 <p className="text-sm text-muted-foreground mt-1 mb-4">
-                  Top stories delivered every morning
+                  {t.newsletter.subtitle}
                 </p>
                 <form className="space-y-3">
                   <Input
                     type="email"
-                    placeholder="Enter your email"
+                    placeholder={t.newsletter.placeholder}
                     className="bg-background"
                   />
                   <Button className="w-full bg-accent hover:bg-accent/90 text-accent-foreground">
-                    Subscribe
+                    {t.newsletter.subscribe}
                   </Button>
                 </form>
                 <p className="text-xs text-muted-foreground mt-3">
-                  No spam, ever. Unsubscribe anytime.
+                  {t.newsletter.noSpam}
                 </p>
               </div>
 
               {/* Weather Widget */}
               <div className="bg-card rounded-xl p-5 shadow-card">
                 <h3 className="text-sm font-medium text-muted-foreground mb-3">
-                  Jacksonville Weather
+                  {t.weather.title}
                 </h3>
                 <div className="flex items-center gap-3">
                   <Sun className="w-10 h-10 text-warning" />
                   <div>
                     <span className="text-3xl font-semibold text-card-foreground">78°F</span>
-                    <p className="text-sm text-muted-foreground">Sunny</p>
+                    <p className="text-sm text-muted-foreground">{t.weather.sunny}</p>
                   </div>
                 </div>
                 <a 
-                  href="#" 
+                  href="/weather" 
                   className="text-sm text-accent hover:text-accent/80 mt-3 inline-block transition-colors"
                 >
-                  View Forecast →
+                  {t.weather.viewForecast}
                 </a>
               </div>
             </aside>
@@ -249,17 +267,19 @@ const News = () => {
 };
 
 const EmptyState = ({ category }: { category: string }) => {
+  const { t } = useLanguage();
+  
   return (
     <div className="text-center py-16">
       <div className="text-5xl mb-4">📭</div>
-      <h3 className="text-xl font-semibold text-primary mb-2">No articles found</h3>
+      <h3 className="text-xl font-semibold text-primary mb-2">{t.news.noArticles}</h3>
       <p className="text-muted-foreground">
         {category 
-          ? `No articles in the "${category}" category yet.`
-          : 'No articles available at the moment.'}
+          ? t.news.noArticlesCategory.replace('{category}', category)
+          : t.news.noArticlesGeneral}
       </p>
       <p className="text-muted-foreground mt-1">
-        Try a different category or check back later.
+        {t.news.tryDifferent}
       </p>
     </div>
   );

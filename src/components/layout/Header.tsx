@@ -4,6 +4,8 @@ import { Search, Menu, User, LogOut } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { useAuth } from '@/hooks/useAuth';
 import { useSearchModal } from '@/hooks/useSearchModal';
+import { useLanguage } from '@/hooks/useLanguage';
+import { LanguageToggle } from '@/components/layout/LanguageToggle';
 import logo from '@/assets/logo.png';
 import {
   DropdownMenu,
@@ -14,25 +16,6 @@ import {
 } from '@/components/ui/dropdown-menu';
 import { Avatar, AvatarFallback, AvatarImage } from '@/components/ui/avatar';
 
-const mainNavLinks = [
-  { label: 'News', href: '/news' },
-  { label: 'Events', href: '/events' },
-  { label: 'Businesses', href: '/businesses' },
-  { label: 'Neighborhoods', href: '/neighborhoods' },
-  { label: 'Weather', href: '/weather' },
-];
-
-const categoryLinks = [
-  { label: 'Local News', href: '/news?category=local' },
-  { label: 'Crime & Safety', href: '/news/crime' },
-  { label: 'Politics', href: '/news?category=politics' },
-  { label: 'Business', href: '/news?category=business' },
-  { label: 'Sports', href: '/news?category=sports' },
-  { label: 'Entertainment', href: '/news?category=entertainment' },
-  { label: 'Weather', href: '/weather' },
-  { label: 'Traffic', href: '/news?category=traffic' },
-];
-
 interface HeaderProps {
   onMenuClick?: () => void;
 }
@@ -42,6 +25,27 @@ export function Header({ onMenuClick }: HeaderProps) {
   const location = useLocation();
   const { user, profile, signOut } = useAuth();
   const { openSearch } = useSearchModal();
+  const { t } = useLanguage();
+
+  // Define navigation links using translations
+  const mainNavLinks = [
+    { label: t.nav.news, href: '/news' },
+    { label: t.nav.events, href: '/events' },
+    { label: t.nav.businesses, href: '/businesses' },
+    { label: t.nav.neighborhoods, href: '/neighborhoods' },
+    { label: t.nav.weather, href: '/weather' },
+  ];
+
+  const categoryLinks = [
+    { label: t.categories.localNews, href: '/news?category=local' },
+    { label: t.categories.crimeSafety, href: '/news/crime' },
+    { label: t.categories.politics, href: '/news?category=politics' },
+    { label: t.categories.business, href: '/news?category=business' },
+    { label: t.categories.sports, href: '/news?category=sports' },
+    { label: t.categories.entertainment, href: '/news?category=entertainment' },
+    { label: t.categories.weather, href: '/weather' },
+    { label: t.categories.traffic, href: '/news?category=traffic' },
+  ];
 
   useEffect(() => {
     const handleScroll = () => {
@@ -95,11 +99,16 @@ export function Header({ onMenuClick }: HeaderProps) {
             </nav>
 
             {/* Right Side Actions */}
-            <div className="flex items-center gap-1 md:gap-4">
+            <div className="flex items-center gap-1 md:gap-3">
+              {/* Language Toggle - Desktop */}
+              <div className="hidden md:block">
+                <LanguageToggle />
+              </div>
+
               <button
                 onClick={openSearch}
                 className="p-2.5 min-h-[44px] min-w-[44px] flex items-center justify-center text-muted-foreground hover:text-accent transition-colors duration-200"
-                aria-label="Search (⌘K)"
+                aria-label={`${t.common.search} (⌘K)`}
               >
                 <Search className="w-5 h-5" />
               </button>
@@ -132,13 +141,13 @@ export function Header({ onMenuClick }: HeaderProps) {
                     <DropdownMenuItem asChild>
                       <Link to="/profile" className="cursor-pointer">
                         <User className="w-4 h-4 mr-2" />
-                        Profile
+                        {t.nav.profile}
                       </Link>
                     </DropdownMenuItem>
                     <DropdownMenuSeparator />
                     <DropdownMenuItem onClick={signOut} className="cursor-pointer text-destructive">
                       <LogOut className="w-4 h-4 mr-2" />
-                      Sign Out
+                      {t.nav.signOut}
                     </DropdownMenuItem>
                   </DropdownMenuContent>
                 </DropdownMenu>
@@ -148,7 +157,7 @@ export function Header({ onMenuClick }: HeaderProps) {
                     to="/auth/signin"
                     className="hidden md:block text-sm font-medium text-muted-foreground hover:text-accent transition-colors duration-200"
                   >
-                    Sign In
+                    {t.nav.signIn}
                   </Link>
 
                   <Link to="/auth/signup" className="hidden md:block">
@@ -157,17 +166,22 @@ export function Header({ onMenuClick }: HeaderProps) {
                       size="sm"
                       className="bg-accent hover:bg-accent/90 text-accent-foreground font-medium px-5"
                     >
-                      Sign Up
+                      {t.nav.signUp}
                     </Button>
                   </Link>
                 </>
               )}
 
+              {/* Language Toggle - Mobile */}
+              <div className="md:hidden">
+                <LanguageToggle />
+              </div>
+
               {/* Mobile Menu Button */}
               <button
                 className="md:hidden p-2.5 min-h-[44px] min-w-[44px] flex items-center justify-center text-muted-foreground hover:text-accent transition-colors duration-200"
                 onClick={onMenuClick}
-                aria-label="Open menu"
+                aria-label={t.common.openMenu}
               >
                 <Menu className="w-6 h-6" />
               </button>
