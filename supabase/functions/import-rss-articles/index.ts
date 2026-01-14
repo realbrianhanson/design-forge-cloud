@@ -333,6 +333,7 @@ Deno.serve(async (req) => {
             published_at: article.publishedAt,
             status: 'active',
             content_type: 'aggregated',
+            language: 'en', // Mark as English
             is_featured: insertedArticles.length === 0,
             is_breaking: false,
             view_count: 0,

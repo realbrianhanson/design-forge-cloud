@@ -1,11 +1,14 @@
 import { useQuery, useInfiniteQuery } from '@tanstack/react-query';
 import { supabase } from '@/integrations/supabase/client';
 import { Tables } from '@/integrations/supabase/types';
+import { useLanguage } from '@/hooks/useLanguage';
 
 // Fetch breaking news (is_breaking = true within last 24 hours)
 export const useBreakingNews = () => {
+  const { language } = useLanguage();
+  
   return useQuery({
-    queryKey: ['breaking-news'],
+    queryKey: ['breaking-news', language],
     queryFn: async () => {
       const twentyFourHoursAgo = new Date();
       twentyFourHoursAgo.setHours(twentyFourHoursAgo.getHours() - 24);
@@ -15,6 +18,7 @@ export const useBreakingNews = () => {
         .select('*')
         .eq('is_breaking', true)
         .eq('status', 'active')
+        .eq('language', language)
         .gte('published_at', twentyFourHoursAgo.toISOString())
         .order('published_at', { ascending: false })
         .limit(1)
@@ -29,14 +33,17 @@ export const useBreakingNews = () => {
 
 // Fetch featured article
 export const useFeaturedArticle = () => {
+  const { language } = useLanguage();
+  
   return useQuery({
-    queryKey: ['featured-article'],
+    queryKey: ['featured-article', language],
     queryFn: async () => {
       const { data, error } = await supabase
         .from('articles')
         .select('*')
         .eq('is_featured', true)
         .eq('status', 'active')
+        .eq('language', language)
         .order('published_at', { ascending: false })
         .limit(1)
         .maybeSingle();
@@ -50,13 +57,16 @@ export const useFeaturedArticle = () => {
 
 // Fetch latest articles (excluding featured)
 export const useLatestArticles = (excludeId?: string, limit: number = 6) => {
+  const { language } = useLanguage();
+  
   return useQuery({
-    queryKey: ['latest-articles', excludeId, limit],
+    queryKey: ['latest-articles', excludeId, limit, language],
     queryFn: async () => {
       let query = supabase
         .from('articles')
         .select('*')
         .eq('status', 'active')
+        .eq('language', language)
         .order('published_at', { ascending: false })
         .limit(limit);
 
@@ -75,13 +85,16 @@ export const useLatestArticles = (excludeId?: string, limit: number = 6) => {
 
 // Infinite scroll articles with optional category filter
 export const useInfiniteArticles = (category: string = '', pageSize: number = 10) => {
+  const { language } = useLanguage();
+  
   return useInfiniteQuery({
-    queryKey: ['infinite-articles', category, pageSize],
+    queryKey: ['infinite-articles', category, pageSize, language],
     queryFn: async ({ pageParam = 0 }) => {
       let query = supabase
         .from('articles')
         .select('*', { count: 'exact' })
         .eq('status', 'active')
+        .eq('language', language)
         .order('published_at', { ascending: false })
         .range(pageParam * pageSize, (pageParam + 1) * pageSize - 1);
 
@@ -108,8 +121,10 @@ export const useInfiniteArticles = (category: string = '', pageSize: number = 10
 
 // Fetch trending articles (by view_count in last 7 days)
 export const useTrendingArticles = (limit: number = 5) => {
+  const { language } = useLanguage();
+  
   return useQuery({
-    queryKey: ['trending-articles', limit],
+    queryKey: ['trending-articles', limit, language],
     queryFn: async () => {
       const sevenDaysAgo = new Date();
       sevenDaysAgo.setDate(sevenDaysAgo.getDate() - 7);
@@ -118,6 +133,7 @@ export const useTrendingArticles = (limit: number = 5) => {
         .from('articles')
         .select('*')
         .eq('status', 'active')
+        .eq('language', language)
         .gte('published_at', sevenDaysAgo.toISOString())
         .order('view_count', { ascending: false })
         .limit(limit);
