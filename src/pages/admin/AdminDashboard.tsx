@@ -177,8 +177,8 @@ const AdminDashboard = () => {
       value: stats?.totalArticles || 0,
       icon: Newspaper,
       color: 'bg-blue-100 text-blue-600',
-      change: '+12%',
-      positive: true,
+      change: articlesDelta.change,
+      positive: articlesDelta.positive,
     },
     {
       label: 'Pending Events',
@@ -193,16 +193,16 @@ const AdminDashboard = () => {
       value: stats?.activeBusinesses || 0,
       icon: Building2,
       color: 'bg-green-100 text-green-600',
-      change: '+8%',
-      positive: true,
+      change: businessesDelta.change,
+      positive: businessesDelta.positive,
     },
     {
       label: 'Total Users',
       value: stats?.totalUsers || 0,
       icon: Users,
       color: 'bg-purple-100 text-purple-600',
-      change: '+24%',
-      positive: true,
+      change: usersDelta.change,
+      positive: usersDelta.positive,
     },
   ];
 
