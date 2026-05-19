@@ -10,8 +10,8 @@ export const useBreakingNews = () => {
   return useQuery({
     queryKey: ['breaking-news', language],
     queryFn: async () => {
-      const twentyFourHoursAgo = new Date();
-      twentyFourHoursAgo.setHours(twentyFourHoursAgo.getHours() - 24);
+      const seventyTwoHoursAgo = new Date();
+      seventyTwoHoursAgo.setHours(seventyTwoHoursAgo.getHours() - 72);
 
       const { data, error } = await supabase
         .from('articles')
@@ -19,7 +19,7 @@ export const useBreakingNews = () => {
         .eq('is_breaking', true)
         .eq('status', 'active')
         .eq('language', language)
-        .gte('published_at', twentyFourHoursAgo.toISOString())
+        .gte('published_at', seventyTwoHoursAgo.toISOString())
         .order('published_at', { ascending: false })
         .limit(1)
         .maybeSingle();
