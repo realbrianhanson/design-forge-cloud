@@ -32,11 +32,29 @@ const AdminDashboard = () => {
   const { data: stats, isLoading: statsLoading } = useQuery({
     queryKey: ['admin-stats'],
     queryFn: async () => {
-      const [articles, pendingEvents, businesses, users] = await Promise.all([
+      const now = new Date();
+      const d30 = new Date(now.getTime() - 30 * 24 * 60 * 60 * 1000).toISOString();
+      const d60 = new Date(now.getTime() - 60 * 24 * 60 * 60 * 1000).toISOString();
+
+      const [
+        articles, pendingEvents, businesses, users,
+        articlesCur, articlesPrev,
+        businessesCur, businessesPrev,
+        usersCur, usersPrev,
+        eventsCur, eventsPrev,
+      ] = await Promise.all([
         supabase.from('articles').select('id', { count: 'exact', head: true }),
         supabase.from('events').select('id', { count: 'exact', head: true }).eq('status', 'pending'),
         supabase.from('businesses').select('id', { count: 'exact', head: true }).eq('status', 'active'),
         supabase.from('user_profiles').select('id', { count: 'exact', head: true }),
+        supabase.from('articles').select('id', { count: 'exact', head: true }).gte('created_at', d30),
+        supabase.from('articles').select('id', { count: 'exact', head: true }).gte('created_at', d60).lt('created_at', d30),
+        supabase.from('businesses').select('id', { count: 'exact', head: true }).gte('created_at', d30),
+        supabase.from('businesses').select('id', { count: 'exact', head: true }).gte('created_at', d60).lt('created_at', d30),
+        supabase.from('user_profiles').select('id', { count: 'exact', head: true }).gte('created_at', d30),
+        supabase.from('user_profiles').select('id', { count: 'exact', head: true }).gte('created_at', d60).lt('created_at', d30),
+        supabase.from('events').select('id', { count: 'exact', head: true }).gte('created_at', d30),
+        supabase.from('events').select('id', { count: 'exact', head: true }).gte('created_at', d60).lt('created_at', d30),
       ]);
 
       return {
@@ -44,10 +62,32 @@ const AdminDashboard = () => {
         pendingEvents: pendingEvents.count || 0,
         activeBusinesses: businesses.count || 0,
         totalUsers: users.count || 0,
+        articlesCur: articlesCur.count || 0,
+        articlesPrev: articlesPrev.count || 0,
+        businessesCur: businessesCur.count || 0,
+        businessesPrev: businessesPrev.count || 0,
+        usersCur: usersCur.count || 0,
+        usersPrev: usersPrev.count || 0,
+        eventsCur: eventsCur.count || 0,
+        eventsPrev: eventsPrev.count || 0,
       };
     },
     enabled: !!isAdmin,
   });
+
+  const computeDelta = (cur: number, prev: number): { change: string; positive: boolean } => {
+    if (prev === 0) {
+      if (cur === 0) return { change: 'No change', positive: true };
+      return { change: 'New', positive: true };
+    }
+    const pct = Math.round(((cur - prev) / prev) * 100);
+    if (pct === 0) return { change: 'No change', positive: true };
+    return { change: `${pct > 0 ? '+' : ''}${pct}%`, positive: pct >= 0 };
+  };
+
+  const articlesDelta = computeDelta(stats?.articlesCur || 0, stats?.articlesPrev || 0);
+  const businessesDelta = computeDelta(stats?.businessesCur || 0, stats?.businessesPrev || 0);
+  const usersDelta = computeDelta(stats?.usersCur || 0, stats?.usersPrev || 0);
 
   // Fetch pending events
   const { data: pendingEventsList } = useQuery({
