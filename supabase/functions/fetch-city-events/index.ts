@@ -26,7 +26,7 @@ function categorizeEvent(title: string): string {
   if (/(food|wine|beer|taste|culinary|brewery|restaurant)/.test(t)) return 'food';
   if (/(kids|family|youth|children|bible school|camp)/.test(t)) return 'family';
   if (/(business|networking|conference|expo|seminar|workshop)/.test(t)) return 'business';
-  if (/(con|comic|gaming|cosplay)/.test(t)) return 'entertainment';
+  if (/(comic|gaming|cosplay|comicon|cos[\s-]?con)/i.test(t)) return 'arts';
   if (/(council|commission|committee|board|hearing|advisory|government)/.test(t)) return 'government';
   return 'community';
 }
