@@ -208,8 +208,17 @@ importance_score: 1-10 where 10 is extremely important breaking news.`;
       throw updateError;
     }
 
-    // Log the processing
-    await supabase
+    // Try to fill missing image_url via og:image scrape (non-fatal)
+    try {
+      if (!article.image_url && article.source_url) {
+        const ogImage = await fetchOgImage(article.source_url);
+        if (ogImage) {
+          await supabase.from('articles').update({ image_url: ogImage }).eq('id', article.id);
+        }
+      }
+    } catch (ogErr) {
+      console.warn('og:image fetch failed:', ogErr);
+    }
       .from('ai_processing_logs')
       .insert({
         article_id: article.id,
