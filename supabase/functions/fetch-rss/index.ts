@@ -34,6 +34,15 @@ function slugify(text: string): string {
     .substring(0, 100);
 }
 
+async function hashSuffix(input: string): Promise<string> {
+  const bytes = new TextEncoder().encode(input);
+  const digest = await crypto.subtle.digest('SHA-256', bytes);
+  return Array.from(new Uint8Array(digest))
+    .slice(0, 4)
+    .map(b => b.toString(16).padStart(2, '0'))
+    .join('');
+}
+
 function stripHtml(html: string): string {
   return html
     .replace(/<[^>]*>/g, '')
@@ -268,7 +277,7 @@ async function fetchAndParseRss(source: RssSource, supabase: any): Promise<Fetch
         // Extract and clean data
         const excerpt = stripHtml(description).substring(0, 300);
         const imageUrl = extractImageUrl(item);
-        const slug = slugify(title) + '-' + Date.now().toString(36);
+        const slug = `${slugify(title)}-${await hashSuffix(externalId)}`;
         
         // Parse published date
         let publishedAt: string | null = null;
@@ -317,12 +326,18 @@ async function fetchAndParseRss(source: RssSource, supabase: any): Promise<Fetch
       }
     }
     
-    // Update last_fetched_at and articles_count
+    // Update last_fetched_at and accumulate articles_count
+    const { data: current } = await supabase
+      .from('rss_sources')
+      .select('articles_count')
+      .eq('id', source.id)
+      .single();
+
     await supabase
       .from('rss_sources')
       .update({
         last_fetched_at: new Date().toISOString(),
-        articles_count: result.articles_inserted,
+        articles_count: (current?.articles_count ?? 0) + result.articles_inserted,
       })
       .eq('id', source.id);
     
@@ -382,12 +397,21 @@ Deno.serve(async (req) => {
     
     console.log(`Processing ${sources.length} RSS sources`);
     
-    // Fetch all sources
-    const results: FetchResult[] = [];
-    for (const source of sources) {
-      const result = await fetchAndParseRss(source as RssSource, supabase);
-      results.push(result);
-    }
+    // Fetch all sources in parallel
+    const settled = await Promise.allSettled(
+      sources.map(source => fetchAndParseRss(source as RssSource, supabase))
+    );
+    const results: FetchResult[] = settled.map((s, i) => {
+      if (s.status === 'fulfilled') return s.value;
+      return {
+        source_id: sources[i].id,
+        source_name: sources[i].name,
+        success: false,
+        articles_found: 0,
+        articles_inserted: 0,
+        error: s.reason instanceof Error ? s.reason.message : 'Unknown error',
+      };
+    });
     
     // Summary
     const totalFound = results.reduce((sum, r) => sum + r.articles_found, 0);
