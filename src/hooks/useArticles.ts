@@ -41,9 +41,9 @@ export const useFeaturedArticle = () => {
       const { data, error } = await supabase
         .from('articles')
         .select('*')
-        .eq('is_featured', true)
         .eq('status', 'active')
         .eq('language', language)
+        .order('is_featured', { ascending: false, nullsFirst: false })
         .order('published_at', { ascending: false })
         .limit(1)
         .maybeSingle();
