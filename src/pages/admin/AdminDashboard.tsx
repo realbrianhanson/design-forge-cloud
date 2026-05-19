@@ -46,6 +46,7 @@ const AdminDashboard = () => {
         totalUsers: users.count || 0,
       };
     },
+    enabled: !!isAdmin,
   });
 
   // Fetch pending events
