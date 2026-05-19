@@ -38,6 +38,8 @@ export const BusinessCard = ({ business, neighborhoodName }: BusinessCardProps) 
           <img
             src={business.cover_image_url}
             alt={business.name}
+            loading="lazy"
+            decoding="async"
             className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-300"
           />
         ) : business.logo_url ? (

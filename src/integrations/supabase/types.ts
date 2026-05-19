@@ -749,6 +749,7 @@ export type Database = {
           daily_digest: boolean | null
           email: string
           id: string
+          source: string | null
           status: string | null
           unsubscribed_at: string | null
           user_id: string | null
@@ -762,6 +763,7 @@ export type Database = {
           daily_digest?: boolean | null
           email: string
           id?: string
+          source?: string | null
           status?: string | null
           unsubscribed_at?: string | null
           user_id?: string | null
@@ -775,6 +777,7 @@ export type Database = {
           daily_digest?: boolean | null
           email?: string
           id?: string
+          source?: string | null
           status?: string | null
           unsubscribed_at?: string | null
           user_id?: string | null
@@ -1097,6 +1100,10 @@ export type Database = {
       [_ in never]: never
     }
     Functions: {
+      check_newsletter_subscription: {
+        Args: { email_addr: string }
+        Returns: Json
+      }
       has_role: {
         Args: {
           _role: Database["public"]["Enums"]["app_role"]

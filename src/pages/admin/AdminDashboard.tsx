@@ -1,6 +1,7 @@
 import { useQuery } from '@tanstack/react-query';
 import { supabase } from '@/integrations/supabase/client';
 import { useAuth } from '@/hooks/useAuth';
+import { useAdminAuth } from '@/hooks/useAdminAuth';
 import { AdminLayout } from '@/components/admin/AdminLayout';
 import { NewsPipelineAdmin } from '@/components/admin/NewsPipelineAdmin';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
@@ -24,6 +25,8 @@ import { formatDistanceToNow } from 'date-fns';
 
 const AdminDashboard = () => {
   const { profile } = useAuth();
+  const { isAdmin } = useAdminAuth();
+
 
   // Fetch stats
   const { data: stats, isLoading: statsLoading } = useQuery({
@@ -43,6 +46,7 @@ const AdminDashboard = () => {
         totalUsers: users.count || 0,
       };
     },
+    enabled: !!isAdmin,
   });
 
   // Fetch pending events
@@ -57,6 +61,7 @@ const AdminDashboard = () => {
         .limit(3);
       return data || [];
     },
+    enabled: !!isAdmin,
   });
 
   // Fetch recent signups
@@ -70,6 +75,7 @@ const AdminDashboard = () => {
         .limit(5);
       return data || [];
     },
+    enabled: !!isAdmin,
   });
 
   // Fetch recent activity
@@ -122,6 +128,7 @@ const AdminDashboard = () => {
         .sort((a, b) => new Date(b.timestamp).getTime() - new Date(a.timestamp).getTime())
         .slice(0, 8);
     },
+    enabled: !!isAdmin,
   });
 
   const statCards = [

@@ -11,8 +11,8 @@ export const useFeaturedBusinesses = (limit: number = 4) => {
         .from('businesses')
         .select('*')
         .eq('status', 'active')
-        .eq('is_featured', true)
-        .order('rating', { ascending: false })
+        .order('is_featured', { ascending: false, nullsFirst: false })
+        .order('rating', { ascending: false, nullsFirst: false })
         .limit(limit);
 
       if (error) throw error;

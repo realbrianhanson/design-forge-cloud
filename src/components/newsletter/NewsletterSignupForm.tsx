@@ -32,45 +32,19 @@ export const NewsletterSignupForm = ({
       // Validate email
       const validatedEmail = emailSchema.parse(subscriberEmail);
 
-      // Check if already subscribed
-      const { data: existing } = await supabase
-        .from('newsletter_subscribers')
-        .select('id, status, verified_at')
-        .eq('email', validatedEmail)
-        .maybeSingle();
+      // Check if already subscribed via security-definer RPC (works for anon users)
+      const { data: existingCheck } = await supabase.rpc('check_newsletter_subscription', {
+        email_addr: validatedEmail,
+      });
 
-      if (existing) {
-        if (existing.status === 'verified' || existing.verified_at) {
+      const check = existingCheck as { exists: boolean; status?: string; is_verified?: boolean } | null;
+
+      if (check?.exists) {
+        if (check.is_verified) {
           throw new Error('already_subscribed');
         }
-        // Resubscribe if unsubscribed
-        if (existing.status === 'unsubscribed') {
-          const verificationToken = crypto.randomUUID();
-          const { error } = await supabase
-            .from('newsletter_subscribers')
-            .update({
-              status: 'pending',
-              verification_token: verificationToken,
-              unsubscribed_at: null,
-              daily_digest: dailyDigest,
-              weekly_newsletter: weeklyNewsletter,
-              breaking_news: breakingNews,
-            })
-            .eq('id', existing.id);
-          if (error) throw error;
-          
-          // Send verification email
-          await sendVerificationEmail(validatedEmail, verificationToken);
-          return { resubscribed: true };
-        }
-        // Already pending - resend verification
-        const verificationToken = crypto.randomUUID();
-        const { error } = await supabase
-          .from('newsletter_subscribers')
-          .update({ verification_token: verificationToken })
-          .eq('id', existing.id);
-        if (error) throw error;
-        await sendVerificationEmail(validatedEmail, verificationToken);
+        // Subscribed but not verified yet, or unsubscribed - re-send verification
+        await sendVerificationEmail(validatedEmail, crypto.randomUUID());
         return { resent: true };
       }
 
@@ -85,6 +59,7 @@ export const NewsletterSignupForm = ({
           daily_digest: dailyDigest,
           weekly_newsletter: weeklyNewsletter,
           breaking_news: breakingNews,
+          source: source,
         });
       if (error) throw error;
 
