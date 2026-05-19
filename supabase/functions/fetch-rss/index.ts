@@ -326,12 +326,18 @@ async function fetchAndParseRss(source: RssSource, supabase: any): Promise<Fetch
       }
     }
     
-    // Update last_fetched_at and articles_count
+    // Update last_fetched_at and accumulate articles_count
+    const { data: current } = await supabase
+      .from('rss_sources')
+      .select('articles_count')
+      .eq('id', source.id)
+      .single();
+
     await supabase
       .from('rss_sources')
       .update({
         last_fetched_at: new Date().toISOString(),
-        articles_count: result.articles_inserted,
+        articles_count: (current?.articles_count ?? 0) + result.articles_inserted,
       })
       .eq('id', source.id);
     
