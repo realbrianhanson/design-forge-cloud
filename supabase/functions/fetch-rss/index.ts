@@ -397,12 +397,21 @@ Deno.serve(async (req) => {
     
     console.log(`Processing ${sources.length} RSS sources`);
     
-    // Fetch all sources
-    const results: FetchResult[] = [];
-    for (const source of sources) {
-      const result = await fetchAndParseRss(source as RssSource, supabase);
-      results.push(result);
-    }
+    // Fetch all sources in parallel
+    const settled = await Promise.allSettled(
+      sources.map(source => fetchAndParseRss(source as RssSource, supabase))
+    );
+    const results: FetchResult[] = settled.map((s, i) => {
+      if (s.status === 'fulfilled') return s.value;
+      return {
+        source_id: sources[i].id,
+        source_name: sources[i].name,
+        success: false,
+        articles_found: 0,
+        articles_inserted: 0,
+        error: s.reason instanceof Error ? s.reason.message : 'Unknown error',
+      };
+    });
     
     // Summary
     const totalFound = results.reduce((sum, r) => sum + r.articles_found, 0);
