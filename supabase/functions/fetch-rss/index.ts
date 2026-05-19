@@ -277,7 +277,7 @@ async function fetchAndParseRss(source: RssSource, supabase: any): Promise<Fetch
         // Extract and clean data
         const excerpt = stripHtml(description).substring(0, 300);
         const imageUrl = extractImageUrl(item);
-        const slug = slugify(title) + '-' + Date.now().toString(36);
+        const slug = `${slugify(title)}-${await hashSuffix(externalId)}`;
         
         // Parse published date
         let publishedAt: string | null = null;
