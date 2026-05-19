@@ -1,0 +1,8 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 1200 630" width="1200" height="630">
+  <rect width="1200" height="630" fill="#0f172a"/>
+  <line x1="450" y1="430" x2="750" y2="430" stroke="#0d9488" stroke-width="6" stroke-linecap="round"/>
+  <text x="600" y="360" text-anchor="middle" font-family="Inter, system-ui, -apple-system, sans-serif" font-weight="700" font-size="180" fill="#ffffff" letter-spacing="-4">
+    <tspan fill="#0d9488">904</tspan> NEWS
+  </text>
+  <text x="600" y="500" text-anchor="middle" font-family="Inter, system-ui, -apple-system, sans-serif" font-weight="500" font-size="32" fill="#94a3b8" letter-spacing="6">JACKSONVILLE</text>
+</svg>
