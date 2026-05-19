@@ -18,7 +18,7 @@ export interface SEOProps {
 
 const DEFAULT_TITLE = '904News - Jacksonville News, Events & Community';
 const DEFAULT_DESCRIPTION = 'Your source for Jacksonville local news, events, business directory, and community. Stay connected with the 904.';
-const DEFAULT_IMAGE = 'https://lovable.dev/opengraph-image-p98pqg.png'; // TODO: Replace with 904News branded image
+const DEFAULT_IMAGE = 'https://904news.com/og-default.svg';
 const SITE_NAME = '904News';
 const SITE_URL = 'https://904news.com';
 
