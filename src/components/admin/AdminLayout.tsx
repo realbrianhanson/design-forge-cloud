@@ -29,10 +29,8 @@ const navItems = [
   { path: '/admin/articles', label: 'Articles', icon: Newspaper },
   { path: '/admin/events', label: 'Events', icon: Calendar },
   { path: '/admin/businesses', label: 'Businesses', icon: Building2 },
-  { path: '/admin/users', label: 'Users', icon: Users },
   { path: '/admin/newsletter', label: 'Newsletter', icon: Mail },
   { path: '/admin/ai', label: 'AI Processing', icon: Sparkles },
-  { path: '/admin/settings', label: 'Settings', icon: Settings },
 ];
 
 export const AdminLayout = ({ children }: AdminLayoutProps) => {
