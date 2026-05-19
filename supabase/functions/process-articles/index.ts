@@ -292,7 +292,7 @@ Deno.serve(async (req) => {
     if (articleId) {
       const { data: article, error: fetchError } = await supabase
         .from('articles')
-        .select('id, title, excerpt, content, source_name')
+        .select('id, title, excerpt, content, source_name, image_url, source_url')
         .eq('id', articleId)
         .single();
 
@@ -314,7 +314,7 @@ Deno.serve(async (req) => {
     // Query articles without AI summary (pending or active)
     const { data: pendingArticles, error: fetchError } = await supabase
       .from('articles')
-      .select('id, title, excerpt, content, source_name')
+      .select('id, title, excerpt, content, source_name, image_url, source_url')
       .is('ai_summary', null)
       .in('status', ['pending', 'active'])
       .order('published_at', { ascending: false })
