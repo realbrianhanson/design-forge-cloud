@@ -749,6 +749,7 @@ export type Database = {
           daily_digest: boolean | null
           email: string
           id: string
+          source: string | null
           status: string | null
           unsubscribed_at: string | null
           user_id: string | null
@@ -762,6 +763,7 @@ export type Database = {
           daily_digest?: boolean | null
           email: string
           id?: string
+          source?: string | null
           status?: string | null
           unsubscribed_at?: string | null
           user_id?: string | null
@@ -775,6 +777,7 @@ export type Database = {
           daily_digest?: boolean | null
           email?: string
           id?: string
+          source?: string | null
           status?: string | null
           unsubscribed_at?: string | null
           user_id?: string | null
