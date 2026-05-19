@@ -75,6 +75,7 @@ const AdminDashboard = () => {
         .limit(5);
       return data || [];
     },
+    enabled: !!isAdmin,
   });
 
   // Fetch recent activity
