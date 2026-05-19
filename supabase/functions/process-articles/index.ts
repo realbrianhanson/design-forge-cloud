@@ -26,6 +26,39 @@ interface ProcessResult {
   error?: string;
 }
 
+async function fetchOgImage(sourceUrl: string): Promise<string | null> {
+  try {
+    const controller = new AbortController();
+    const timeout = setTimeout(() => controller.abort(), 5000);
+    const res = await fetch(sourceUrl, { signal: controller.signal, headers: { 'User-Agent': 'Mozilla/5.0 904NewsBot' } });
+    clearTimeout(timeout);
+    if (!res.ok || !res.body) return null;
+    const reader = res.body.getReader();
+    const chunks: Uint8Array[] = [];
+    let total = 0;
+    const MAX = 200 * 1024;
+    while (total < MAX) {
+      const { done, value } = await reader.read();
+      if (done) break;
+      chunks.push(value);
+      total += value.length;
+    }
+    try { await reader.cancel(); } catch { /* ignore */ }
+    const html = new TextDecoder().decode(new Uint8Array(chunks.flatMap(c => Array.from(c)))).slice(0, MAX);
+    const m1 = html.match(/<meta\s+property=["']og:image["']\s+content=["']([^"']+)["']/i);
+    const m2 = html.match(/<meta\s+content=["']([^"']+)["']\s+property=["']og:image["']/i);
+    const found = m1?.[1] || m2?.[1];
+    if (!found) return null;
+    try {
+      return new URL(found, sourceUrl).toString();
+    } catch {
+      return null;
+    }
+  } catch {
+    return null;
+  }
+}
+
 // deno-lint-ignore no-explicit-any
 async function processArticle(supabase: any, article: any, apiKey: string): Promise<ProcessResult> {
   const result: ProcessResult = {
