@@ -128,6 +128,7 @@ const AdminDashboard = () => {
         .sort((a, b) => new Date(b.timestamp).getTime() - new Date(a.timestamp).getTime())
         .slice(0, 8);
     },
+    enabled: !!isAdmin,
   });
 
   const statCards = [
