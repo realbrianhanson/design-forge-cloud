@@ -35,3 +35,6 @@ verify_jwt = false
 
 [functions.fetch-eventbrite-events]
 verify_jwt = false
+
+[functions.sitemap-xml]
+verify_jwt = false

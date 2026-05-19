@@ -32,4 +32,4 @@ Disallow: /auth/*
 Crawl-delay: 1
 
 # Sitemap
-Sitemap: https://904news.com/sitemap.xml
+Sitemap: https://uaqokyxsvzmslndqtovk.supabase.co/functions/v1/sitemap-xml

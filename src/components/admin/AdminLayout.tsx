@@ -18,6 +18,7 @@ import {
 import { Avatar, AvatarFallback, AvatarImage } from '@/components/ui/avatar';
 import { Button } from '@/components/ui/button';
 import { Skeleton } from '@/components/ui/skeleton';
+import { useQueryClient } from '@tanstack/react-query';
 
 interface AdminLayoutProps {
   children: ReactNode;
@@ -38,6 +39,7 @@ export const AdminLayout = ({ children }: AdminLayoutProps) => {
   const { profile, signOut } = useAuth();
   const location = useLocation();
   const navigate = useNavigate();
+  const queryClient = useQueryClient();
 
   useEffect(() => {
     if (!isLoading && !user) {
@@ -88,6 +90,7 @@ export const AdminLayout = ({ children }: AdminLayoutProps) => {
   };
 
   const handleSignOut = async () => {
+    queryClient.clear();
     await signOut();
     navigate('/');
   };
