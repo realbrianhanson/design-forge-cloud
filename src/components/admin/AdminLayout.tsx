@@ -90,6 +90,7 @@ export const AdminLayout = ({ children }: AdminLayoutProps) => {
   };
 
   const handleSignOut = async () => {
+    queryClient.clear();
     await signOut();
     navigate('/');
   };
