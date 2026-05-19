@@ -219,6 +219,9 @@ importance_score: 1-10 where 10 is extremely important breaking news.`;
     } catch (ogErr) {
       console.warn('og:image fetch failed:', ogErr);
     }
+
+    // Log the processing
+    await supabase
       .from('ai_processing_logs')
       .insert({
         article_id: article.id,
