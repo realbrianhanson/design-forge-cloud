@@ -61,6 +61,7 @@ const AdminDashboard = () => {
         .limit(3);
       return data || [];
     },
+    enabled: !!isAdmin,
   });
 
   // Fetch recent signups
