@@ -25,6 +25,8 @@ import { formatDistanceToNow } from 'date-fns';
 
 const AdminDashboard = () => {
   const { profile } = useAuth();
+  const { isAdmin } = useAdminAuth();
+
 
   // Fetch stats
   const { data: stats, isLoading: statsLoading } = useQuery({
