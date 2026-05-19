@@ -5,9 +5,7 @@ const corsHeaders = {
   "Access-Control-Allow-Headers": "authorization, x-client-info, apikey, content-type",
 };
 
-// Google Places API endpoints
 const PLACES_SEARCH_URL = "https://places.googleapis.com/v1/places:searchText";
-const PLACES_DETAILS_URL = "https://places.googleapis.com/v1/places";
 
 interface GooglePlace {
   id: string;
@@ -16,10 +14,14 @@ interface GooglePlace {
   userRatingCount?: number;
   priceLevel?: string;
   photos?: Array<{ name: string }>;
-  currentOpeningHours?: {
+  websiteUri?: string;
+  internationalPhoneNumber?: string;
+  nationalPhoneNumber?: string;
+  regularOpeningHours?: {
     weekdayDescriptions?: string[];
     openNow?: boolean;
   };
+  editorialSummary?: { text?: string };
   formattedAddress?: string;
 }
 
@@ -34,7 +36,6 @@ interface EnrichmentResult {
   error?: string;
 }
 
-// Convert Google price level to numeric
 function mapPriceLevel(priceLevel?: string): number | null {
   const mapping: Record<string, number> = {
     "PRICE_LEVEL_FREE": 0,
@@ -46,14 +47,13 @@ function mapPriceLevel(priceLevel?: string): number | null {
   return priceLevel ? mapping[priceLevel] ?? null : null;
 }
 
-// Search for a business on Google Places
 async function findGooglePlace(
   apiKey: string,
   businessName: string,
   address: string | null,
   city: string | null
 ): Promise<GooglePlace | null> {
-  const searchQuery = address 
+  const searchQuery = address
     ? `${businessName} ${address}, ${city || 'Jacksonville'}, FL`
     : `${businessName} ${city || 'Jacksonville'}, FL`;
 
@@ -63,7 +63,20 @@ async function findGooglePlace(
       headers: {
         "Content-Type": "application/json",
         "X-Goog-Api-Key": apiKey,
-        "X-Goog-FieldMask": "places.id,places.displayName,places.rating,places.userRatingCount,places.priceLevel,places.photos,places.formattedAddress",
+        "X-Goog-FieldMask": [
+          "places.id",
+          "places.displayName",
+          "places.rating",
+          "places.userRatingCount",
+          "places.priceLevel",
+          "places.photos",
+          "places.formattedAddress",
+          "places.websiteUri",
+          "places.internationalPhoneNumber",
+          "places.nationalPhoneNumber",
+          "places.regularOpeningHours",
+          "places.editorialSummary",
+        ].join(","),
       },
       body: JSON.stringify({
         textQuery: searchQuery,
@@ -90,9 +103,44 @@ async function findGooglePlace(
   }
 }
 
-// Get photo URL from Google Places
-function getPhotoUrl(apiKey: string, photoReference: string, maxWidth = 800): string {
-  return `https://places.googleapis.com/v1/${photoReference}/media?maxHeightPx=${maxWidth}&maxWidthPx=${maxWidth}&key=${apiKey}`;
+// Download a Google Place photo and store it in Supabase Storage.
+// Returns the public URL, or null on any failure.
+// deno-lint-ignore no-explicit-any
+async function downloadAndStorePhoto(
+  supabase: any,
+  apiKey: string,
+  businessId: string,
+  photoReference: string
+): Promise<string | null> {
+  try {
+    const url = `https://places.googleapis.com/v1/${photoReference}/media?maxHeightPx=800&maxWidthPx=800`;
+    const response = await fetch(url, {
+      headers: { "X-Goog-Api-Key": apiKey },
+    });
+
+    if (!response.ok) {
+      console.error(`Photo fetch failed (${response.status}) for ${businessId}`);
+      return null;
+    }
+
+    const bytes = new Uint8Array(await response.arrayBuffer());
+    const contentType = response.headers.get("content-type") ?? "image/jpeg";
+    const path = `${businessId}/cover.jpg`;
+
+    const { error: uploadError } = await supabase.storage
+      .from("business-photos")
+      .upload(path, bytes, { contentType, upsert: true });
+
+    if (uploadError) {
+      console.error(`Storage upload failed for ${businessId}:`, uploadError.message);
+      return null;
+    }
+
+    return supabase.storage.from("business-photos").getPublicUrl(path).data.publicUrl;
+  } catch (error) {
+    console.error(`downloadAndStorePhoto error for ${businessId}:`, error);
+    return null;
+  }
 }
 
 Deno.serve(async (req) => {
@@ -110,7 +158,6 @@ Deno.serve(async (req) => {
     const supabaseServiceKey = Deno.env.get("SUPABASE_SERVICE_ROLE_KEY")!;
     const supabase = createClient(supabaseUrl, supabaseServiceKey);
 
-    // Parse request body
     let limit = 50;
     let forceRefresh = false;
     let businessIds: string[] | null = null;
@@ -122,17 +169,14 @@ Deno.serve(async (req) => {
       if (body.businessIds) businessIds = body.businessIds;
     }
 
-    // Query businesses that need enrichment
     let query = supabase
       .from("businesses")
-      .select("id, name, address, city")
+      .select("id, name, address, city, phone, description")
       .eq("status", "active");
 
-    // Either specific IDs or businesses without ratings/photos
     if (businessIds && businessIds.length > 0) {
       query = query.in("id", businessIds);
     } else if (!forceRefresh) {
-      // Find businesses missing ratings OR cover images
       query = query.or("rating.is.null,cover_image_url.is.null");
     }
 
@@ -169,7 +213,6 @@ Deno.serve(async (req) => {
       };
 
       try {
-        // Search for this business on Google
         const googlePlace = await findGooglePlace(
           apiKey,
           business.name,
@@ -185,37 +228,56 @@ Deno.serve(async (req) => {
 
         result.googlePlaceId = googlePlace.id;
 
-        // Build update object
         const updateData: Record<string, unknown> = {
           last_synced_at: new Date().toISOString(),
         };
 
-        // Add rating
         if (googlePlace.rating) {
           updateData.rating = googlePlace.rating;
           result.rating = googlePlace.rating;
         }
 
-        // Add review count
         if (googlePlace.userRatingCount) {
           updateData.review_count = googlePlace.userRatingCount;
           result.reviewCount = googlePlace.userRatingCount;
         }
 
-        // Add price level
         const priceLevel = mapPriceLevel(googlePlace.priceLevel);
         if (priceLevel !== null) {
           updateData.price_level = priceLevel;
         }
 
-        // Add photo
-        if (googlePlace.photos && googlePlace.photos.length > 0) {
-          const photoUrl = getPhotoUrl(apiKey, googlePlace.photos[0].name);
-          updateData.cover_image_url = photoUrl;
-          result.photoUrl = photoUrl;
+        if (googlePlace.websiteUri) {
+          updateData.website = googlePlace.websiteUri;
         }
 
-        // Update the business
+        const googlePhone =
+          googlePlace.internationalPhoneNumber || googlePlace.nationalPhoneNumber;
+        if (googlePhone && !business.phone) {
+          updateData.phone = googlePhone;
+        }
+
+        if (googlePlace.regularOpeningHours?.weekdayDescriptions?.length) {
+          updateData.hours = googlePlace.regularOpeningHours.weekdayDescriptions;
+        }
+
+        if (googlePlace.editorialSummary?.text && !business.description) {
+          updateData.description = googlePlace.editorialSummary.text;
+        }
+
+        if (googlePlace.photos && googlePlace.photos.length > 0) {
+          const photoUrl = await downloadAndStorePhoto(
+            supabase,
+            apiKey,
+            business.id,
+            googlePlace.photos[0].name
+          );
+          if (photoUrl) {
+            updateData.cover_image_url = photoUrl;
+            result.photoUrl = photoUrl;
+          }
+        }
+
         const { error: updateError } = await supabase
           .from("businesses")
           .update(updateData)
@@ -229,7 +291,6 @@ Deno.serve(async (req) => {
           enrichedCount++;
           console.log(`✓ Enriched: ${business.name} - Rating: ${result.rating}, Reviews: ${result.reviewCount}`);
         }
-
       } catch (error) {
         result.error = error instanceof Error ? error.message : "Unknown error";
         errorCount++;
@@ -237,7 +298,6 @@ Deno.serve(async (req) => {
 
       results.push(result);
 
-      // Rate limiting: 50ms delay between requests
       await new Promise(r => setTimeout(r, 50));
     }
 
@@ -257,7 +317,7 @@ Deno.serve(async (req) => {
 
   } catch (error) {
     console.error("Error in enrich-businesses:", error);
-    
+
     return new Response(
       JSON.stringify({
         success: false,
