@@ -39,6 +39,7 @@ export const AdminLayout = ({ children }: AdminLayoutProps) => {
   const { profile, signOut } = useAuth();
   const location = useLocation();
   const navigate = useNavigate();
+  const queryClient = useQueryClient();
 
   useEffect(() => {
     if (!isLoading && !user) {
