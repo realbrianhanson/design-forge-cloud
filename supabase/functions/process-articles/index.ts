@@ -402,6 +402,9 @@ Deno.serve(async (req) => {
       }
 
       const result = await processArticle(supabase, article, LOVABLE_API_KEY);
+      if (result.success) {
+        await enrichArticle(supabase, article, LOVABLE_API_KEY);
+      }
 
       return new Response(JSON.stringify({
         success: result.success,
