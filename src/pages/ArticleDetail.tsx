@@ -196,6 +196,12 @@ const ArticleDetail = () => {
             <AiSummaryCard summary={article.ai_summary} />
           )}
 
+          {/* TL;DR bullets */}
+          <TldrBullets bullets={tldr} />
+
+          {/* Why it matters for Jacksonville */}
+          <LocalImpact bullets={localImpact} />
+
           {/* Excerpt as Lead Paragraph */}
           {article.excerpt && (
             <p className="text-xl text-muted-foreground leading-relaxed mt-8">
