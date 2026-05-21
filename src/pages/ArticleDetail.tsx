@@ -297,6 +297,9 @@ const ArticleDetail = () => {
             </div>
           </section>
 
+          {/* FAQ */}
+          <ArticleFaq items={faq} />
+
           {/* Comments Section */}
           <CommentsSection
             articleId={article.id}
