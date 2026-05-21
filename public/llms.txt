@@ -1,0 +1,19 @@
+# 904News
+
+> Jacksonville's trusted source for local news, events, business updates, weather, crime data, and community connection across the 904.
+
+904News is a community news platform covering Jacksonville, Florida. We aggregate local journalism, surface upcoming events, maintain a directory of local businesses, and publish hyperlocal weather, crime, and neighborhood pages for 15 areas across Duval County. Content is available in English and Spanish.
+
+## Pages
+
+- [Home](/): Featured local news, upcoming events, and business spotlights.
+- [News](/news): Latest Jacksonville news articles aggregated from local sources.
+- [Events](/events): Upcoming Jacksonville events with calendar and map views.
+- [Businesses](/businesses): Directory of local Jacksonville businesses by category and neighborhood.
+- [Neighborhoods](/neighborhoods): 15 Jacksonville neighborhoods with localized news, events, businesses, and crime data.
+- [Weather](/weather): Jacksonville weather, beach conditions, and severe-weather alerts.
+- [Crime](/crime): Jacksonville crime map, incident reports, and neighborhood crime statistics.
+
+## Optional
+
+- [Newsletter](/newsletter): Subscribe to the 904News email digest.
