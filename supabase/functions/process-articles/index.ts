@@ -442,7 +442,15 @@ Deno.serve(async (req) => {
     const results: ProcessResult[] = [];
     for (const article of pendingArticles) {
       const result = await processArticle(supabase, article, LOVABLE_API_KEY);
-      results.push(result);
+      if (result.success) {
+        // Fetch fresh row (with content) and enrich
+        const { data: fresh } = await supabase
+          .from('articles')
+          .select('id, title, excerpt, content, source_name')
+          .eq('id', article.id)
+          .single();
+        if (fresh) await enrichArticle(supabase, fresh, LOVABLE_API_KEY);
+      }
 
       // Small delay between articles to avoid rate limits
       await new Promise(resolve => setTimeout(resolve, 500));
