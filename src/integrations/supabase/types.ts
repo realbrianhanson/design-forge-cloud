@@ -70,13 +70,16 @@ export type Database = {
           content: string | null
           content_type: string | null
           created_at: string | null
+          enrichment_status: string | null
           excerpt: string | null
           external_id: string | null
+          faq: Json | null
           id: string
           image_url: string | null
           is_breaking: boolean | null
           is_featured: boolean | null
           language: string | null
+          local_impact: string[] | null
           neighborhood_id: string | null
           published_at: string | null
           related_incident_id: string | null
@@ -86,6 +89,7 @@ export type Database = {
           source_url: string | null
           status: string | null
           title: string
+          tldr_bullets: string[] | null
           updated_at: string | null
           upvotes: number | null
           view_count: number | null
@@ -98,13 +102,16 @@ export type Database = {
           content?: string | null
           content_type?: string | null
           created_at?: string | null
+          enrichment_status?: string | null
           excerpt?: string | null
           external_id?: string | null
+          faq?: Json | null
           id?: string
           image_url?: string | null
           is_breaking?: boolean | null
           is_featured?: boolean | null
           language?: string | null
+          local_impact?: string[] | null
           neighborhood_id?: string | null
           published_at?: string | null
           related_incident_id?: string | null
@@ -114,6 +121,7 @@ export type Database = {
           source_url?: string | null
           status?: string | null
           title: string
+          tldr_bullets?: string[] | null
           updated_at?: string | null
           upvotes?: number | null
           view_count?: number | null
@@ -126,13 +134,16 @@ export type Database = {
           content?: string | null
           content_type?: string | null
           created_at?: string | null
+          enrichment_status?: string | null
           excerpt?: string | null
           external_id?: string | null
+          faq?: Json | null
           id?: string
           image_url?: string | null
           is_breaking?: boolean | null
           is_featured?: boolean | null
           language?: string | null
+          local_impact?: string[] | null
           neighborhood_id?: string | null
           published_at?: string | null
           related_incident_id?: string | null
@@ -142,6 +153,7 @@ export type Database = {
           source_url?: string | null
           status?: string | null
           title?: string
+          tldr_bullets?: string[] | null
           updated_at?: string | null
           upvotes?: number | null
           view_count?: number | null
