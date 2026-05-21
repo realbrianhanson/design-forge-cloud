@@ -7,6 +7,13 @@ import { Breadcrumb } from '@/components/ui/breadcrumb-nav';
 import { ArticleCard, ArticleCardSkeleton } from '@/components/home/ArticleCard';
 import { EngagementBar } from '@/components/article/EngagementBar';
 import { AiSummaryCard } from '@/components/article/AiSummaryCard';
+import {
+  TldrBullets,
+  LocalImpact,
+  ArticleFaq,
+  buildFaqJsonLd,
+  type FaqItem,
+} from '@/components/article/ArticleEnrichment';
 import { CommentsSection } from '@/components/article/CommentsSection';
 import { SourceBadge } from '@/components/article/SourceBadge';
 import { RelatedIncidentCard } from '@/components/crime/RelatedIncidentCard';
@@ -82,6 +89,32 @@ const ArticleDetail = () => {
   const articleUrl = `/news/${article.slug || article.id}`;
   const articleDescription = article.excerpt || article.ai_summary || '';
 
+  // Enrichment fields (added by process-articles enrichment pass)
+  const enriched = article as typeof article & {
+    tldr_bullets?: string[] | null;
+    local_impact?: string[] | null;
+    faq?: FaqItem[] | null;
+  };
+  const tldr = Array.isArray(enriched.tldr_bullets) ? enriched.tldr_bullets : [];
+  const localImpact = Array.isArray(enriched.local_impact) ? enriched.local_impact : [];
+  const faq: FaqItem[] = Array.isArray(enriched.faq)
+    ? (enriched.faq as FaqItem[]).filter(
+        (q) => q && typeof q.question === 'string' && typeof q.answer === 'string'
+      )
+    : [];
+
+  const articleSchema = generateArticleSchema({
+    title: article.title,
+    description: articleDescription,
+    image: article.image_url || undefined,
+    publishedAt: article.published_at || article.created_at || undefined,
+    updatedAt: article.updated_at || undefined,
+    author: article.source_name,
+    url: articleUrl,
+  });
+  const structuredData =
+    faq.length > 0 ? [articleSchema, buildFaqJsonLd(faq)] : articleSchema;
+
   return (
     <Layout>
       <SEO 
@@ -96,15 +129,7 @@ const ArticleDetail = () => {
           author: article.source_name,
           section: formatCategoryDisplay(article.category),
         }}
-        structuredData={generateArticleSchema({
-          title: article.title,
-          description: articleDescription,
-          image: article.image_url || undefined,
-          publishedAt: article.published_at || article.created_at || undefined,
-          updatedAt: article.updated_at || undefined,
-          author: article.source_name,
-          url: articleUrl,
-        })}
+        structuredData={structuredData}
       />
       <article className="section-spacing">
         <div className="max-w-3xl mx-auto px-4">
@@ -170,6 +195,12 @@ const ArticleDetail = () => {
           {isAggregated && article.ai_summary && (
             <AiSummaryCard summary={article.ai_summary} />
           )}
+
+          {/* TL;DR bullets */}
+          <TldrBullets bullets={tldr} />
+
+          {/* Why it matters for Jacksonville */}
+          <LocalImpact bullets={localImpact} />
 
           {/* Excerpt as Lead Paragraph */}
           {article.excerpt && (
@@ -265,6 +296,9 @@ const ArticleDetail = () => {
               )}
             </div>
           </section>
+
+          {/* FAQ */}
+          <ArticleFaq items={faq} />
 
           {/* Comments Section */}
           <CommentsSection

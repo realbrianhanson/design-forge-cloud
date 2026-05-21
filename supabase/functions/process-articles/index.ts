@@ -60,6 +60,107 @@ async function fetchOgImage(sourceUrl: string): Promise<string | null> {
 }
 
 // deno-lint-ignore no-explicit-any
+async function enrichArticle(supabase: any, article: any, apiKey: string): Promise<boolean> {
+  try {
+    const articleText = (article.content || article.excerpt || '').substring(0, 3000);
+    if (!articleText || articleText.length < 100) {
+      console.log(`Skipping enrichment for "${article.title}" - insufficient text`);
+      return false;
+    }
+
+    const systemPrompt = `You are a Jacksonville, Florida local news editor enriching articles for 904news.com readers. Respond ONLY with a valid JSON object — no markdown, no code fences, no preamble. Never copy sentences verbatim from the source; always paraphrase.`;
+
+    const userPrompt = `Source article:
+Title: ${article.title}
+Source: ${article.source_name || 'Unknown'}
+Body: ${articleText}
+
+Produce this exact JSON structure:
+{
+  "tldr_bullets": [ "3 to 5 short factual bullets (max 18 words each) capturing who/what/where/when/$ — paraphrased, not copied" ],
+  "local_impact": [ "2 to 3 bullets (max 25 words each) explaining specifically why this matters for Jacksonville residents — local angle, not a rehash of the summary" ],
+  "faq": [ { "question": "natural 'People also ask' style question", "answer": "1-2 sentence answer in your own words" } ]
+}
+
+Rules:
+- tldr_bullets: 3-5 items, each a complete fact
+- local_impact: 2-3 items, must be Jacksonville-specific (neighborhoods, residents, traffic, schools, businesses, taxes, etc.)
+- faq: 3-5 Q&A pairs that a reader would actually ask
+- If the source lacks enough info for an item, omit that item — never fabricate
+- Output JSON only.`;
+
+    const response = await fetch('https://ai.gateway.lovable.dev/v1/chat/completions', {
+      method: 'POST',
+      headers: { 'Authorization': `Bearer ${apiKey}`, 'Content-Type': 'application/json' },
+      body: JSON.stringify({
+        model: 'google/gemini-2.5-flash',
+        messages: [
+          { role: 'system', content: systemPrompt },
+          { role: 'user', content: userPrompt },
+        ],
+        temperature: 0.4,
+      }),
+    });
+
+    if (!response.ok) {
+      console.warn(`Enrichment AI call failed: ${response.status}`);
+      return false;
+    }
+
+    const aiResponse = await response.json();
+    const content = aiResponse.choices?.[0]?.message?.content;
+    if (!content) return false;
+
+    let parsed: any;
+    try {
+      let jsonStr = content;
+      const fence = content.match(/```(?:json)?\s*([\s\S]*?)\s*```/);
+      if (fence) jsonStr = fence[1];
+      else {
+        const obj = content.match(/\{[\s\S]*\}/);
+        if (obj) jsonStr = obj[0];
+      }
+      parsed = JSON.parse(jsonStr.trim());
+    } catch (e) {
+      console.warn('Enrichment parse failed:', e);
+      return false;
+    }
+
+    const tldr = Array.isArray(parsed.tldr_bullets)
+      ? parsed.tldr_bullets.filter((s: any) => typeof s === 'string' && s.trim().length > 0).slice(0, 5)
+      : null;
+    const impact = Array.isArray(parsed.local_impact)
+      ? parsed.local_impact.filter((s: any) => typeof s === 'string' && s.trim().length > 0).slice(0, 3)
+      : null;
+    const faq = Array.isArray(parsed.faq)
+      ? parsed.faq
+          .filter((q: any) => q && typeof q.question === 'string' && typeof q.answer === 'string')
+          .slice(0, 5)
+      : null;
+
+    const { error } = await supabase
+      .from('articles')
+      .update({
+        tldr_bullets: tldr,
+        local_impact: impact,
+        faq: faq,
+        enrichment_status: 'complete',
+      })
+      .eq('id', article.id);
+
+    if (error) {
+      console.warn('Enrichment update failed:', error);
+      return false;
+    }
+    console.log(`✨ Enriched: ${article.title.substring(0, 50)}...`);
+    return true;
+  } catch (e) {
+    console.warn('Enrichment error:', e);
+    return false;
+  }
+}
+
+// deno-lint-ignore no-explicit-any
 async function processArticle(supabase: any, article: any, apiKey: string): Promise<ProcessResult> {
   const result: ProcessResult = {
     id: article.id,
@@ -301,6 +402,9 @@ Deno.serve(async (req) => {
       }
 
       const result = await processArticle(supabase, article, LOVABLE_API_KEY);
+      if (result.success) {
+        await enrichArticle(supabase, article, LOVABLE_API_KEY);
+      }
 
       return new Response(JSON.stringify({
         success: result.success,
@@ -342,9 +446,36 @@ Deno.serve(async (req) => {
     for (const article of pendingArticles) {
       const result = await processArticle(supabase, article, LOVABLE_API_KEY);
       results.push(result);
-
-      // Small delay between articles to avoid rate limits
+      if (result.success) {
+        const { data: fresh } = await supabase
+          .from('articles')
+          .select('id, title, excerpt, content, source_name')
+          .eq('id', article.id)
+          .single();
+        if (fresh) await enrichArticle(supabase, fresh, LOVABLE_API_KEY);
+      }
       await new Promise(resolve => setTimeout(resolve, 500));
+    }
+
+    // Backfill: enrich already-summarized articles that are missing enrichment
+    const remaining = Math.max(0, limit - pendingArticles.length);
+    if (remaining > 0) {
+      const { data: needEnrich } = await supabase
+        .from('articles')
+        .select('id, title, excerpt, content, source_name')
+        .not('ai_summary', 'is', null)
+        .eq('status', 'active')
+        .or('enrichment_status.is.null,enrichment_status.eq.pending')
+        .order('published_at', { ascending: false })
+        .limit(remaining);
+
+      if (needEnrich && needEnrich.length > 0) {
+        console.log(`Backfilling enrichment for ${needEnrich.length} articles...`);
+        for (const a of needEnrich) {
+          await enrichArticle(supabase, a, LOVABLE_API_KEY);
+          await new Promise(r => setTimeout(r, 500));
+        }
+      }
     }
 
     // Summary
