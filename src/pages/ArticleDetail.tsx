@@ -7,6 +7,13 @@ import { Breadcrumb } from '@/components/ui/breadcrumb-nav';
 import { ArticleCard, ArticleCardSkeleton } from '@/components/home/ArticleCard';
 import { EngagementBar } from '@/components/article/EngagementBar';
 import { AiSummaryCard } from '@/components/article/AiSummaryCard';
+import {
+  TldrBullets,
+  LocalImpact,
+  ArticleFaq,
+  buildFaqJsonLd,
+  type FaqItem,
+} from '@/components/article/ArticleEnrichment';
 import { CommentsSection } from '@/components/article/CommentsSection';
 import { SourceBadge } from '@/components/article/SourceBadge';
 import { RelatedIncidentCard } from '@/components/crime/RelatedIncidentCard';
