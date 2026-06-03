@@ -161,6 +161,22 @@ Deno.serve(async (req) => {
     return new Response(null, { headers: corsHeaders });
   }
 
+  // Internal pipeline auth: when PIPELINE_SECRET is set, require it for all
+  // non-OPTIONS requests. This blocks anonymous abuse of AI/credit-burning
+  // endpoints. Cron jobs and admin triggers must send the header:
+  //   x-pipeline-secret: <PIPELINE_SECRET>
+  const __pipelineSecret = Deno.env.get('PIPELINE_SECRET');
+  if (__pipelineSecret) {
+    const __provided = req.headers.get('x-pipeline-secret');
+    if (__provided !== __pipelineSecret) {
+      return new Response(JSON.stringify({ error: 'Unauthorized' }), {
+        status: 401,
+        headers: { ...corsHeaders, 'Content-Type': 'application/json' },
+      });
+    }
+  }
+
+
   try {
     const supabaseUrl = Deno.env.get("SUPABASE_URL")!;
     const supabaseServiceKey = Deno.env.get("SUPABASE_SERVICE_ROLE_KEY")!;
@@ -184,12 +200,12 @@ Deno.serve(async (req) => {
       neighborhoods?.map(n => [n.name.toLowerCase(), n.id]) || []
     );
 
-    // Generate sample crime data
-    // Note: JSO ArcGIS endpoint is not publicly accessible. 
-    // This generates realistic sample data for development.
-    // To use real data, configure a valid ArcGIS endpoint with ?endpoint=URL
-    const customEndpoint = url.searchParams.get("endpoint");
-    
+    // Generate sample crime data. JSO ArcGIS endpoint is not publicly accessible,
+    // so we generate realistic sample data. The previous ?endpoint= parameter
+    // was removed to prevent SSRF — a server-side allowlist would be required
+    // to re-enable arbitrary endpoint fetching.
+    const customEndpoint: string | null = null;
+
     let incidents: Array<{
       incident_number: string;
       incident_type: string;
@@ -204,40 +220,7 @@ Deno.serve(async (req) => {
       neighborhood_name: string;
     }>;
 
-    if (customEndpoint) {
-      // Try to fetch from custom endpoint
-      console.log(`Attempting to fetch from custom endpoint: ${customEndpoint}`);
-      
-      try {
-        const queryUrl = new URL(`${customEndpoint}/query`);
-        queryUrl.searchParams.set("where", "1=1");
-        queryUrl.searchParams.set("outFields", "*");
-        queryUrl.searchParams.set("returnGeometry", "true");
-        queryUrl.searchParams.set("f", "json");
-        queryUrl.searchParams.set("resultRecordCount", "500");
-        
-        const response = await fetch(queryUrl.toString());
-        if (!response.ok) {
-          throw new Error(`Endpoint returned ${response.status}`);
-        }
-        
-        const data = await response.json();
-        if (data.error) {
-          throw new Error(data.error.message || "ArcGIS error");
-        }
-        
-        // If we get here, we'd parse the real data
-        // For now, fall back to sample data
-        console.log(`Custom endpoint returned ${data.features?.length || 0} features`);
-        incidents = generateCrimeIncidents(sampleCount, hoursBack);
-      } catch (error) {
-        console.log(`Custom endpoint failed: ${error}`);
-        incidents = generateCrimeIncidents(sampleCount, hoursBack);
-      }
-    } else {
-      // Generate sample data
-      incidents = generateCrimeIncidents(sampleCount, hoursBack);
-    }
+    incidents = generateCrimeIncidents(sampleCount, hoursBack);
 
     console.log(`Processing ${incidents.length} incidents...`);
 

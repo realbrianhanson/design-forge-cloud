@@ -80,6 +80,18 @@ Deno.serve(async (req) => {
     return new Response('ok', { headers: corsHeaders });
   }
 
+  const __pipelineSecret = Deno.env.get('PIPELINE_SECRET');
+  if (__pipelineSecret) {
+    const __provided = req.headers.get('x-pipeline-secret');
+    if (__provided !== __pipelineSecret) {
+      return new Response(JSON.stringify({ error: 'Unauthorized' }), {
+        status: 401,
+        headers: { ...corsHeaders, 'Content-Type': 'application/json' },
+      });
+    }
+  }
+
+
   try {
     const supabaseUrl = Deno.env.get('SUPABASE_URL')!;
     const supabaseKey = Deno.env.get('SUPABASE_SERVICE_ROLE_KEY')!;
