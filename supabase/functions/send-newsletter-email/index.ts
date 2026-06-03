@@ -24,9 +24,16 @@ const handler = async (req: Request): Promise<Response> => {
   }
 
   try {
-    const { type, email, token, baseUrl }: EmailRequest = await req.json();
+    const { type, email, token }: EmailRequest = await req.json();
 
-    if (!email || !token || !baseUrl) {
+    if (!email || !token) {
+      throw new Error('Missing required fields');
+    }
+
+    // Always use the server-side SITE_URL — never trust client input here
+    const baseUrl = SITE_URL;
+
+    if (false) {
       throw new Error('Missing required fields');
     }
 
