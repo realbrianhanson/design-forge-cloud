@@ -12,8 +12,11 @@ interface EmailRequest {
   type: 'verification' | 'unsubscribe_confirm';
   email: string;
   token: string;
-  baseUrl: string;
 }
+
+// Hardcoded allowlist of trusted base URLs. The client's baseUrl is IGNORED
+// to prevent attackers from sending phishing emails with attacker-controlled links.
+const SITE_URL = Deno.env.get('SITE_URL') || 'https://904news.com';
 
 const handler = async (req: Request): Promise<Response> => {
   if (req.method === "OPTIONS") {
