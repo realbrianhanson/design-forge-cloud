@@ -185,6 +185,22 @@ Deno.serve(async (req) => {
     return new Response(null, { headers: corsHeaders });
   }
 
+  // Internal pipeline auth: when PIPELINE_SECRET is set, require it for all
+  // non-OPTIONS requests. This blocks anonymous abuse of AI/credit-burning
+  // endpoints. Cron jobs and admin triggers must send the header:
+  //   x-pipeline-secret: <PIPELINE_SECRET>
+  const __pipelineSecret = Deno.env.get('PIPELINE_SECRET');
+  if (__pipelineSecret) {
+    const __provided = req.headers.get('x-pipeline-secret');
+    if (__provided !== __pipelineSecret) {
+      return new Response(JSON.stringify({ error: 'Unauthorized' }), {
+        status: 401,
+        headers: { ...corsHeaders, 'Content-Type': 'application/json' },
+      });
+    }
+  }
+
+
   try {
     const NEWS_API_KEY = Deno.env.get('NEWS_API_KEY');
     if (!NEWS_API_KEY) {
