@@ -33,9 +33,6 @@ const handler = async (req: Request): Promise<Response> => {
     // Always use the server-side SITE_URL — never trust client input here
     const baseUrl = SITE_URL;
 
-    if (false) {
-      throw new Error('Missing required fields');
-    }
 
     let subject: string;
     let html: string;
