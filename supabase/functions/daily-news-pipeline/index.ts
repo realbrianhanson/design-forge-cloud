@@ -89,6 +89,7 @@ Deno.serve(async (req) => {
         headers: {
           'Authorization': `Bearer ${SUPABASE_ANON_KEY}`,
           'Content-Type': 'application/json',
+          ...(__pipelineSecret ? { 'x-pipeline-secret': __pipelineSecret } : {}),
         },
         body: JSON.stringify({}),
       });
