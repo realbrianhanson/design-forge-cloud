@@ -38,12 +38,30 @@ export const useFeaturedArticle = () => {
   return useQuery({
     queryKey: ['featured-article', language],
     queryFn: async () => {
+      const seventyTwoHoursAgo = new Date();
+      seventyTwoHoursAgo.setHours(seventyTwoHoursAgo.getHours() - 72);
+
+      // Prefer the most recent featured article published in the last 72h
+      const { data: featured, error: featuredError } = await supabase
+        .from('articles')
+        .select('*')
+        .eq('status', 'active')
+        .eq('language', language)
+        .eq('is_featured', true)
+        .gte('published_at', seventyTwoHoursAgo.toISOString())
+        .order('published_at', { ascending: false })
+        .limit(1)
+        .maybeSingle();
+
+      if (featuredError) throw featuredError;
+      if (featured) return featured as Tables<'articles'>;
+
+      // Fallback: newest active article
       const { data, error } = await supabase
         .from('articles')
         .select('*')
         .eq('status', 'active')
         .eq('language', language)
-        .order('is_featured', { ascending: false, nullsFirst: false })
         .order('published_at', { ascending: false })
         .limit(1)
         .maybeSingle();
