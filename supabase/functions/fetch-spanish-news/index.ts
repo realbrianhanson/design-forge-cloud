@@ -212,7 +212,7 @@ Deno.serve(async (req) => {
             status: 'active',
             content_type: 'aggregated',
             language: 'es', // Mark as Spanish
-            is_featured: insertedArticles.length === 0,
+            is_featured: false,
             is_breaking: false,
             view_count: 0,
             upvotes: 0,
