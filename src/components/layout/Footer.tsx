@@ -138,7 +138,7 @@ export function Footer() {
       <div className="border-t border-primary-foreground/10">
         <div className="container-news py-6">
           <div className="flex flex-col sm:flex-row items-center justify-between gap-4">
-            <p className="text-sm text-primary-foreground/50">
+            <p className="text-sm text-primary-foreground/80">
               © 2026 904News. All rights reserved.
             </p>
             <nav className="flex items-center gap-6">
@@ -146,10 +146,11 @@ export function Footer() {
                 <span key={link.href} className="flex items-center gap-6">
                   <Link
                     to={link.href}
-                    className="text-sm text-primary-foreground/50 hover:text-primary-foreground/70 transition-colors duration-200"
+                    className="text-sm text-primary-foreground/80 hover:text-primary-foreground transition-colors duration-200"
                   >
                     {link.label}
                   </Link>
+
                   {index < legalLinks.length - 1 && (
                     <span className="text-primary-foreground/20">|</span>
                   )}
