@@ -305,7 +305,7 @@ async function fetchAndParseRss(source: RssSource, supabase: any): Promise<Fetch
         const { error: insertError } = await supabase
           .from('articles')
           .insert({
-            title: title.substring(0, 500),
+            title: decodeEntities(title).substring(0, 500),
             slug,
             excerpt: excerpt || null,
             source_url: link,
