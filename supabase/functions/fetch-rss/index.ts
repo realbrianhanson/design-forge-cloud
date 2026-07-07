@@ -43,18 +43,27 @@ async function hashSuffix(input: string): Promise<string> {
     .join('');
 }
 
+const NAMED_ENTITIES: Record<string, string> = {
+  amp: '&', lt: '<', gt: '>', quot: '"', apos: "'", nbsp: ' ',
+  ldquo: '\u201C', rdquo: '\u201D', lsquo: '\u2018', rsquo: '\u2019',
+  mdash: '\u2014', ndash: '\u2013', hellip: '\u2026', trade: '\u2122',
+  copy: '\u00A9', reg: '\u00AE', middot: '\u00B7', bull: '\u2022',
+};
+
+function decodeEntities(str: string): string {
+  if (!str) return str;
+  return str
+    .replace(/&#x([0-9a-fA-F]+);/g, (_, hex) => String.fromCodePoint(parseInt(hex, 16)))
+    .replace(/&#(\d+);/g, (_, dec) => String.fromCodePoint(parseInt(dec, 10)))
+    .replace(/&([a-zA-Z]+);/g, (m, name) => NAMED_ENTITIES[name] ?? m);
+}
+
 function stripHtml(html: string): string {
-  return html
-    .replace(/<[^>]*>/g, '')
-    .replace(/&nbsp;/g, ' ')
-    .replace(/&amp;/g, '&')
-    .replace(/&lt;/g, '<')
-    .replace(/&gt;/g, '>')
-    .replace(/&quot;/g, '"')
-    .replace(/&#39;/g, "'")
+  return decodeEntities(html.replace(/<[^>]*>/g, ''))
     .replace(/\s+/g, ' ')
     .trim();
 }
+
 
 function extractImageUrl(item: Record<string, unknown>): string | null {
   // Try media:content
