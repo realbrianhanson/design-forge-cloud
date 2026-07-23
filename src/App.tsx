@@ -41,6 +41,9 @@ const AdminEvents = lazy(() => import("./pages/admin/AdminEvents"));
 const AdminBusinesses = lazy(() => import("./pages/admin/AdminBusinesses"));
 const AdminAI = lazy(() => import("./pages/admin/AdminAI"));
 const AdminNewsletter = lazy(() => import("./pages/admin/AdminNewsletter"));
+const AdminUsers = lazy(() => import("./pages/admin/AdminUsers"));
+const AdminActivities = lazy(() => import("./pages/admin/AdminActivities"));
+const AdminActivityDetail = lazy(() => import("./pages/admin/AdminActivityDetail"));
 const NewsletterPage = lazy(() => import("./pages/newsletter/NewsletterPage"));
 const NewsletterVerify = lazy(() => import("./pages/newsletter/NewsletterVerify"));
 const NewsletterUnsubscribe = lazy(() => import("./pages/newsletter/NewsletterUnsubscribe"));
@@ -119,6 +122,9 @@ const App = () => (
                       <Route path="/admin/businesses" element={<AdminBusinesses />} />
                       <Route path="/admin/ai" element={<AdminAI />} />
                       <Route path="/admin/newsletter" element={<AdminNewsletter />} />
+                      <Route path="/admin/users" element={<AdminUsers />} />
+                      <Route path="/admin/activities" element={<AdminActivities />} />
+                      <Route path="/admin/activities/:id" element={<AdminActivityDetail />} />
                       {/* Newsletter Routes */}
                       <Route path="/newsletter" element={<NewsletterPage />} />
                       <Route path="/newsletter/verify" element={<NewsletterVerify />} />
