@@ -67,18 +67,18 @@ export function Footer() {
                 target="_blank"
                 rel="noopener noreferrer"
                 className="p-2 text-primary-foreground/70 hover:text-primary-foreground transition-colors duration-200"
-                aria-label="Facebook"
+                aria-label="Follow 904 News on Facebook"
               >
-                <Facebook className="w-5 h-5" />
+                <Facebook className="w-5 h-5" aria-hidden="true" />
               </a>
               <a
                 href="https://instagram.com"
                 target="_blank"
                 rel="noopener noreferrer"
                 className="p-2 text-primary-foreground/70 hover:text-primary-foreground transition-colors duration-200"
-                aria-label="Instagram"
+                aria-label="Follow 904 News on Instagram"
               >
-                <Instagram className="w-5 h-5" />
+                <Instagram className="w-5 h-5" aria-hidden="true" />
               </a>
             </div>
           </div>
