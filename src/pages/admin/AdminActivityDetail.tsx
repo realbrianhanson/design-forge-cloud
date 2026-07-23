@@ -9,19 +9,65 @@ import { Skeleton } from '@/components/ui/skeleton';
 import { ArrowLeft, AlertCircle } from 'lucide-react';
 import { format } from 'date-fns';
 
-const AdminActivityDetail = () => {
-  const { id } = useParams<{ id: string }>();
+type ActivityType = 'user' | 'event';
 
-  const { data, isLoading, error } = useQuery({
-    queryKey: ['admin-activity', id],
+interface ActivityDetailData {
+  id: string;
+  type: ActivityType;
+  title: string;
+  status: string;
+  created_at: string;
+  raw: Record<string, unknown>;
+}
+
+const AdminActivityDetail = () => {
+  const params = useParams<{ type?: string; id: string }>();
+  const id = params.id;
+  // Support legacy /admin/activities/:id by trying both tables when type isn't in the URL.
+  const type = (params.type as ActivityType | undefined) ?? undefined;
+
+  const { data, isLoading, error } = useQuery<ActivityDetailData | null>({
+    queryKey: ['admin-activity-detail', type, id],
     queryFn: async () => {
-      const { data, error } = await supabase
-        .from('data_operation_logs')
-        .select('*')
-        .eq('id', id!)
-        .maybeSingle();
-      if (error) throw error;
-      return data;
+      if (!id) return null;
+
+      const tryUser = async (): Promise<ActivityDetailData | null> => {
+        const { data } = await supabase
+          .from('user_profiles')
+          .select('*')
+          .eq('id', id)
+          .maybeSingle();
+        if (!data) return null;
+        return {
+          id: data.id,
+          type: 'user',
+          title: `New user signup: ${data.display_name || 'Anonymous'}`,
+          status: 'success',
+          created_at: data.created_at || '',
+          raw: data as Record<string, unknown>,
+        };
+      };
+
+      const tryEvent = async (): Promise<ActivityDetailData | null> => {
+        const { data } = await supabase
+          .from('events')
+          .select('*')
+          .eq('id', id)
+          .maybeSingle();
+        if (!data) return null;
+        return {
+          id: data.id,
+          type: 'event',
+          title: data.title,
+          status: data.status || 'unknown',
+          created_at: data.created_at || '',
+          raw: data as Record<string, unknown>,
+        };
+      };
+
+      if (type === 'user') return (await tryUser()) ?? (await tryEvent());
+      if (type === 'event') return (await tryEvent()) ?? (await tryUser());
+      return (await tryUser()) ?? (await tryEvent());
     },
     enabled: !!id,
   });
@@ -59,52 +105,36 @@ const AdminActivityDetail = () => {
             <Card className="bg-white lg:col-span-2">
               <CardHeader><CardTitle className="text-lg">Overview</CardTitle></CardHeader>
               <CardContent className="space-y-4">
-                <Field label="Operation">{data.operation_name}</Field>
+                <Field label="Title">{data.title}</Field>
                 <Field label="Type">
-                  <Badge variant="outline">{data.operation_type}</Badge>
+                  <Badge variant="outline" className="capitalize">{data.type}</Badge>
                 </Field>
                 <Field label="Status">
-                  <Badge variant="outline">{data.status}</Badge>
+                  <Badge variant="outline" className="capitalize">{data.status}</Badge>
                 </Field>
-                <Field label="Details">
-                  <p className="text-slate-700 whitespace-pre-wrap">
-                    {data.details || '—'}
-                  </p>
-                </Field>
-                {data.error_message && (
-                  <Field label="Error">
-                    <p className="text-red-700 whitespace-pre-wrap">{data.error_message}</p>
-                  </Field>
-                )}
               </CardContent>
             </Card>
 
             <Card className="bg-white">
               <CardHeader><CardTitle className="text-lg">Metadata</CardTitle></CardHeader>
               <CardContent className="space-y-4">
-                <Field label="User">System</Field>
                 <Field label="Timestamp">
-                  {format(new Date(data.created_at), 'PPpp')}
+                  {data.created_at ? format(new Date(data.created_at), 'PPpp') : '—'}
                 </Field>
-                {typeof data.duration_ms === 'number' && (
-                  <Field label="Duration">{data.duration_ms} ms</Field>
-                )}
                 <Field label="ID">
                   <code className="text-xs text-slate-600 break-all">{data.id}</code>
                 </Field>
               </CardContent>
             </Card>
 
-            {data.metadata && Object.keys(data.metadata).length > 0 && (
-              <Card className="bg-white lg:col-span-3">
-                <CardHeader><CardTitle className="text-lg">Log Data</CardTitle></CardHeader>
-                <CardContent>
-                  <pre className="text-xs bg-slate-50 p-4 rounded-lg overflow-x-auto text-slate-700">
-                    {JSON.stringify(data.metadata, null, 2)}
-                  </pre>
-                </CardContent>
-              </Card>
-            )}
+            <Card className="bg-white lg:col-span-3">
+              <CardHeader><CardTitle className="text-lg">Record Data</CardTitle></CardHeader>
+              <CardContent>
+                <pre className="text-xs bg-slate-50 p-4 rounded-lg overflow-x-auto text-slate-700">
+                  {JSON.stringify(data.raw, null, 2)}
+                </pre>
+              </CardContent>
+            </Card>
           </div>
         </>
       )}
