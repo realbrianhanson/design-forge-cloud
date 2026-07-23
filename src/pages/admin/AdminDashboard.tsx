@@ -150,7 +150,7 @@ const AdminDashboard = () => {
           type: 'user',
           title: `New user signed up: ${user.display_name || 'Anonymous'}`,
           timestamp: user.created_at || '',
-          link: `/admin/activities/${user.id}`,
+          link: `/admin/activities/user/${user.id}`,
         });
       });
 
