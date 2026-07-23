@@ -12,7 +12,7 @@ import { format } from 'date-fns';
 
 interface ActivityRow {
   id: string;
-  operation_type: string;
+  operation_type: 'user' | 'event';
   operation_name: string;
   status: string;
   details: string | null;
@@ -20,23 +20,56 @@ interface ActivityRow {
 }
 
 const statusColor = (s: string) => {
-  if (s === 'success' || s === 'completed') return 'text-green-700 border-green-300';
-  if (s === 'failed' || s === 'error') return 'text-red-700 border-red-300';
+  if (s === 'success' || s === 'completed' || s === 'approved') return 'text-green-700 border-green-300';
+  if (s === 'failed' || s === 'error' || s === 'rejected') return 'text-red-700 border-red-300';
   if (s === 'pending' || s === 'running') return 'text-yellow-700 border-yellow-300';
   return 'text-slate-700 border-slate-300';
 };
 
 const AdminActivities = () => {
   const { data, isLoading } = useQuery<ActivityRow[]>({
-    queryKey: ['admin-activities'],
+    queryKey: ['admin-activities-feed'],
     queryFn: async () => {
-      const { data, error } = await supabase
-        .from('data_operation_logs')
-        .select('id, operation_type, operation_name, status, details, created_at')
-        .order('created_at', { ascending: false })
-        .limit(200);
-      if (error) throw error;
-      return (data as ActivityRow[]) || [];
+      const [events, users] = await Promise.all([
+        supabase
+          .from('events')
+          .select('id, title, status, created_at')
+          .order('created_at', { ascending: false })
+          .limit(100),
+        supabase
+          .from('user_profiles')
+          .select('id, display_name, created_at')
+          .order('created_at', { ascending: false })
+          .limit(100),
+      ]);
+
+      const rows: ActivityRow[] = [];
+
+      users.data?.forEach((u) => {
+        rows.push({
+          id: u.id,
+          operation_type: 'user',
+          operation_name: 'New user signup',
+          status: 'success',
+          details: u.display_name || 'Anonymous',
+          created_at: u.created_at || '',
+        });
+      });
+
+      events.data?.forEach((e) => {
+        rows.push({
+          id: e.id,
+          operation_type: 'event',
+          operation_name: e.status === 'pending' ? 'Event submitted' : 'Event published',
+          status: e.status || 'unknown',
+          details: e.title,
+          created_at: e.created_at || '',
+        });
+      });
+
+      return rows.sort(
+        (a, b) => new Date(b.created_at).getTime() - new Date(a.created_at).getTime()
+      );
     },
   });
 
@@ -44,7 +77,7 @@ const AdminActivities = () => {
     <AdminLayout>
       <div className="mb-8">
         <h1 className="text-3xl font-bold text-slate-900">Activity Log</h1>
-        <p className="text-slate-600 mt-1">Recent operations and system activity.</p>
+        <p className="text-slate-600 mt-1">Recent user signups and event submissions.</p>
       </div>
 
       <Card className="bg-white">
@@ -69,14 +102,14 @@ const AdminActivities = () => {
                 </TableHeader>
                 <TableBody>
                   {data.map((a) => (
-                    <TableRow key={a.id}>
-                      <TableCell className="font-medium text-slate-900">System</TableCell>
-                      <TableCell className="text-slate-600">{a.operation_type}</TableCell>
+                    <TableRow key={`${a.operation_type}-${a.id}`}>
+                      <TableCell className="font-medium text-slate-900 capitalize">{a.operation_type}</TableCell>
+                      <TableCell className="text-slate-600">{a.operation_name}</TableCell>
                       <TableCell className="text-slate-700 max-w-xs truncate">
-                        {a.operation_name}
+                        {a.details}
                       </TableCell>
                       <TableCell className="text-sm text-slate-600 whitespace-nowrap">
-                        {format(new Date(a.created_at), 'MMM d, yyyy h:mm a')}
+                        {a.created_at ? format(new Date(a.created_at), 'MMM d, yyyy h:mm a') : '—'}
                       </TableCell>
                       <TableCell>
                         <Badge variant="outline" className={statusColor(a.status)}>
@@ -84,7 +117,7 @@ const AdminActivities = () => {
                         </Badge>
                       </TableCell>
                       <TableCell className="text-right">
-                        <Link to={`/admin/activities/${a.id}`}>
+                        <Link to={`/admin/activities/${a.operation_type}/${a.id}`}>
                           <Button size="sm" variant="outline">
                             <Eye className="w-4 h-4 mr-1" /> View
                           </Button>
