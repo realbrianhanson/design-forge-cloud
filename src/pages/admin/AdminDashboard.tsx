@@ -150,7 +150,7 @@ const AdminDashboard = () => {
           type: 'user',
           title: `New user signed up: ${user.display_name || 'Anonymous'}`,
           timestamp: user.created_at || '',
-          link: `/admin/users`,
+          link: `/admin/activities/${user.id}`,
         });
       });
 
@@ -160,7 +160,7 @@ const AdminDashboard = () => {
           type: 'event',
           title: `Event ${event.status === 'pending' ? 'submitted' : 'published'}: ${event.title}`,
           timestamp: event.created_at || '',
-          link: `/admin/events`,
+          link: `/admin/activities/${event.id}`,
         });
       });
 
