@@ -160,7 +160,7 @@ const AdminDashboard = () => {
           type: 'event',
           title: `Event ${event.status === 'pending' ? 'submitted' : 'published'}: ${event.title}`,
           timestamp: event.created_at || '',
-          link: `/admin/activities/${event.id}`,
+          link: `/admin/activities/event/${event.id}`,
         });
       });
 
