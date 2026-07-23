@@ -123,8 +123,9 @@ const App = () => (
                       <Route path="/admin/ai" element={<AdminAI />} />
                       <Route path="/admin/newsletter" element={<AdminNewsletter />} />
                       <Route path="/admin/users" element={<AdminUsers />} />
-                      <Route path="/admin/activities" element={<AdminActivities />} />
-                      <Route path="/admin/activities/:id" element={<AdminActivityDetail />} />
+                     <Route path="/admin/activities" element={<AdminActivities />} />
+                     <Route path="/admin/activities/:type/:id" element={<AdminActivityDetail />} />
+                     <Route path="/admin/activities/:id" element={<AdminActivityDetail />} />
                       {/* Newsletter Routes */}
                       <Route path="/newsletter" element={<NewsletterPage />} />
                       <Route path="/newsletter/verify" element={<NewsletterVerify />} />
